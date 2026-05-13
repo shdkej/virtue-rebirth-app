@@ -27,7 +27,8 @@ pnpm start       # 프로덕션 서버 (build 후)
 - Next.js 15 (App Router) + React 19 + TypeScript
 - Tailwind CSS v4 + OKLCH 토큰 + Pretendard Variable
 - lucide-react 아이콘
-- 로컬/mock 데이터만 (외부 API/DB 없음, 외부 의존 무추가)
+- Claude Vision 채점 — 서버사이드 `/api/score` (Anthropic SDK + zod). 키 없으면 mock 폴백.
+- 데이터는 로컬 localStorage (외부 DB 없음)
 
 ## 메뉴 (5개, 하단 탭)
 
@@ -42,9 +43,51 @@ pnpm start       # 프로덕션 서버 (build 후)
 - `src/lib/store.ts` — `useSyncExternalStore` 기반 localStorage 영속 상태.
   - 키: `virtue.rebirth.v1`, `virtue.tone.v1`, `virtue.dailycap.v1`, `virtue.theme.v1`
   - 첫 로드 시 `MOCK_DEEDS` 14건이 시드됨.
-- `src/lib/judge.ts` — 메모 키워드 라우팅 + 톤(soft/casual) 별 채점 결과 풀 (≥ 50건). 점수 분포는 0~5 중 2~3 가중치 중심.
+- `src/lib/judge.ts` — mock 채점 풀 (메모 키워드 라우팅 + soft/casual 50+ 코멘트). AI 키가 없거나 호출 실패 시 폴백 경로.
+- `src/lib/score-client.ts` / `src/app/api/score/route.ts` — 서버사이드 Claude Vision 채점. `IJudgeOutcome.source = "ai" | "mock"`.
 - `src/lib/species.ts` — 11단계 (돌→천계의 무언가). 단계마다 `trait`/`evolutionLine`/`nextHint`.
 - 저장 시 직전 누적 → 새 누적 사이에 종 임계치 통과하면 LevelUpSheet 모달이 표시됨.
+
+## AI 채점 (Claude Vision)
+
+`/api/score` (POST) — 서버사이드 Node 런타임. 요청·응답 모두 zod로 검증.
+
+요청:
+
+```json
+{
+  "imageBase64": "<base64>",
+  "mimeType": "image/jpeg|png|gif|webp",
+  "memo": "선택, 500자 이내",
+  "toneMode": "soft|casual"
+}
+```
+
+응답 (200):
+
+```json
+{ "source": "ai", "model": "claude-sonnet-4-6", "score": 3, "comment": "...", "tags": ["배려","일상"] }
+```
+
+상태 코드:
+
+- `200` — AI 채점 성공.
+- `400` — 요청 스키마 불일치.
+- `502` — AI 호출 실패 또는 응답 파싱 실패. 클라이언트는 자동 mock 폴백.
+- `503` — `ANTHROPIC_API_KEY` 미설정. 클라이언트는 자동 mock 폴백.
+
+시스템 프롬프트는 `src/lib/score-prompt.ts` — 사실 묘사 + 가벼운 유머, 도덕적 칭찬/설교 금지.
+
+### 환경 변수
+
+`.env.local` (Git에 커밋 X) 또는 운영 환경에 설정:
+
+| 키 | 기본값 | 설명 |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | (없음) | 비어 있으면 mock 폴백. |
+| `SCORING_MODEL` | `claude-sonnet-4-6` | 사용할 Claude 모델 ID. |
+
+`.env.example` 참조.
 
 ## 인터랙션 디테일
 
@@ -74,8 +117,8 @@ src/
 
 ## 다음 단계
 
-- 진짜 AI 채점 API 연결 (Claude Sonnet 4.6 vision, zod로 JSON 강제)
-- 사진 영속화 (Supabase Storage / Cloudflare R2)
+- 사진 영속화 (Supabase Storage / Cloudflare R2) — 현재 사진은 blob URL preview만.
+- 서버 측 일일 30덕 캡 검증 (현재는 클라이언트 가드만).
 - shadcn/ui base-nova 컴포넌트 도입 (Drawer로 업로드 모달 교체)
 - 배포 도메인 결정 (`virtue.oracle.shdkej.com` 후보)
 - 친구 공유 / 도전 과제 / 푸시 (MVP 이후)

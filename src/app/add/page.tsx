@@ -9,7 +9,7 @@ import { ScorePill } from "@/components/score-pill";
 import { TagChip } from "@/components/tag-chip";
 import { LevelUpSheet } from "@/components/level-up-sheet";
 import { showToast } from "@/components/toast";
-import { mockJudge, type IJudgeResult } from "@/lib/judge";
+import { judgeWithFallback, type IJudgeOutcome } from "@/lib/score-client";
 import {
   addDeed,
   useTone,
@@ -28,9 +28,10 @@ const AddDeedPage = () => {
   const stats = useVirtueStats();
 
   const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [memo, setMemo] = useState("");
   const [judging, setJudging] = useState(false);
-  const [result, setResult] = useState<IJudgeResult | null>(null);
+  const [result, setResult] = useState<IJudgeOutcome | null>(null);
   const [rerolls, setRerolls] = useState(0);
   const [unlocked, setUnlocked] = useState<ISpecies | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -43,24 +44,27 @@ const AddDeedPage = () => {
   }, [preview]);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
+    const picked = e.target.files?.[0];
+    if (!picked) return;
+    const url = URL.createObjectURL(picked);
     setPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return url;
     });
+    setFile(picked);
     setResult(null);
     setRerolls(0);
   };
 
-  const runJudge = () => {
+  const runJudge = async () => {
     setJudging(true);
     setResult(null);
-    window.setTimeout(() => {
-      setResult(mockJudge(memo, tone));
+    try {
+      const outcome = await judgeWithFallback({ file, memo, tone });
+      setResult(outcome);
+    } finally {
       setJudging(false);
-    }, 900);
+    }
   };
 
   const onJudge = () => {
@@ -77,6 +81,7 @@ const AddDeedPage = () => {
   const onReset = () => {
     if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
+    setFile(null);
     setMemo("");
     setResult(null);
     setRerolls(0);
@@ -218,8 +223,23 @@ const AddDeedPage = () => {
         <Card className="animate-virtue-pop px-5 py-5">
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">AI가 본 오늘</p>
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-              mock
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px]"
+              style={
+                result.source === "ai"
+                  ? {
+                      background:
+                        "color-mix(in oklab, var(--positive), transparent 80%)",
+                      color: "var(--positive)",
+                    }
+                  : {
+                      background: "var(--muted)",
+                      color: "var(--muted-foreground)",
+                    }
+              }
+              title={result.source === "ai" && result.model ? result.model : undefined}
+            >
+              {result.source === "ai" ? "AI" : "mock"}
             </span>
           </div>
           <div className="mt-1 flex items-baseline gap-2">
@@ -280,7 +300,7 @@ const AddDeedPage = () => {
 
       {!result && !preview && (
         <p className="px-1 text-[11px] leading-relaxed text-muted-foreground">
-          <Camera className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden /> 사진은 이 기기에만 잠시 머물러요. 채점은 아직 mock이에요.
+          <Camera className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden /> 사진은 이 기기에만 잠시 머물러요. 키가 설정돼 있으면 AI가, 없으면 mock이 채점해요.
         </p>
       )}
 
