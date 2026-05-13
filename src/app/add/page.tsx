@@ -62,6 +62,9 @@ const AddDeedPage = () => {
     try {
       const outcome = await judgeWithFallback({ file, memo, tone });
       setResult(outcome);
+      if (outcome.fallbackReason) {
+        showToast("AI가 잠깐 졸고 있어요. 임시 판정으로 보여드릴게요.");
+      }
     } finally {
       setJudging(false);
     }

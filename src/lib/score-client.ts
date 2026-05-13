@@ -3,9 +3,12 @@ import { ALLOWED_MIME } from "./score-schema";
 
 export type IJudgeSource = "ai" | "mock";
 
+export type IFallbackReason = "api_error" | "network_error";
+
 export interface IJudgeOutcome extends IJudgeResult {
   source: IJudgeSource;
   model?: string;
+  fallbackReason?: IFallbackReason;
 }
 
 const isAllowedMime = (m: string): m is (typeof ALLOWED_MIME)[number] =>
@@ -44,7 +47,7 @@ export const judgeWithFallback = async (params: {
     });
 
     if (!res.ok) {
-      return { ...mockJudge(memo, tone), source: "mock" };
+      return { ...mockJudge(memo, tone), source: "mock", fallbackReason: "api_error" };
     }
 
     const data = (await res.json()) as {
@@ -62,6 +65,6 @@ export const judgeWithFallback = async (params: {
       model: data.model,
     };
   } catch {
-    return { ...mockJudge(memo, tone), source: "mock" };
+    return { ...mockJudge(memo, tone), source: "mock", fallbackReason: "network_error" };
   }
 };
