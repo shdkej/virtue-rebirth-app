@@ -1,11 +1,14 @@
+"use client";
+
 import { Card } from "@/components/card";
 import { ProgressBar } from "@/components/progress-bar";
 import { SPECIES, getSpeciesFor } from "@/lib/species";
-import { MOCK_TOTAL_VIRTUE } from "@/lib/mock-data";
+import { useVirtueStats } from "@/lib/store";
 import { cn } from "@/lib/cn";
 
 const DexPage = () => {
-  const { current, progress } = getSpeciesFor(MOCK_TOTAL_VIRTUE);
+  const { total } = useVirtueStats();
+  const { current, next, progress } = getSpeciesFor(total);
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
@@ -22,19 +25,25 @@ const DexPage = () => {
           <span className="text-3xl" aria-hidden>
             {current.emoji}
           </span>
-          <div className="flex flex-col">
+          <div className="flex flex-1 flex-col">
             <span className="text-base font-semibold">{current.name}</span>
             <span className="text-[11px] text-muted-foreground">{current.blurb}</span>
+            <span className="mt-0.5 text-[11px] text-foreground/75">{current.trait}</span>
           </div>
         </div>
         <div className="mt-3">
           <ProgressBar value={progress} tone="brand" />
         </div>
+        {next ? (
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            {next.nextHint ?? "다음 생: 베일 속"}
+          </p>
+        ) : null}
       </Card>
 
       <ol className="flex flex-col gap-2">
         {SPECIES.map((s) => {
-          const unlocked = MOCK_TOTAL_VIRTUE >= s.min;
+          const unlocked = total >= s.min;
           const isCurrent = s.stage === current.stage;
           const isLocked = !unlocked;
           return (
@@ -53,7 +62,7 @@ const DexPage = () => {
                   <div className="flex flex-1 flex-col">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold">
-                        {isLocked ? "잠금" : s.name}
+                        {isLocked ? "???" : s.name}
                       </span>
                       <span className="text-[10px] text-muted-foreground">Lv.{s.stage}</span>
                       {isCurrent && (
@@ -63,7 +72,7 @@ const DexPage = () => {
                       )}
                     </div>
                     <span className="text-[11px] text-muted-foreground">
-                      {isLocked ? "?" : s.blurb}
+                      {isLocked ? "다음 생의 비밀." : s.blurb}
                     </span>
                   </div>
                   <span className="text-right text-[10px] text-muted-foreground tabular-nums">

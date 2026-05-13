@@ -2,15 +2,38 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Camera, ImagePlus, Loader2, RotateCw, Sparkles } from "lucide-react";
 import { Card } from "@/components/card";
+import { ScorePill } from "@/components/score-pill";
+import { TagChip } from "@/components/tag-chip";
+import { LevelUpSheet } from "@/components/level-up-sheet";
+import { showToast } from "@/components/toast";
 import { mockJudge, type IJudgeResult } from "@/lib/judge";
+import {
+  addDeed,
+  useTone,
+  useDailyCapEnabled,
+  useVirtueStats,
+} from "@/lib/store";
+import { DAILY_CAP } from "@/lib/mock-data";
+import { getRecentlyUnlocked, type ISpecies } from "@/lib/species";
+
+const MAX_REROLLS = 3;
 
 const AddDeedPage = () => {
+  const router = useRouter();
+  const [tone] = useTone();
+  const [capEnabled] = useDailyCapEnabled();
+  const stats = useVirtueStats();
+
   const [preview, setPreview] = useState<string | null>(null);
   const [memo, setMemo] = useState("");
   const [judging, setJudging] = useState(false);
   const [result, setResult] = useState<IJudgeResult | null>(null);
+  const [rerolls, setRerolls] = useState(0);
+  const [unlocked, setUnlocked] = useState<ISpecies | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -28,15 +51,27 @@ const AddDeedPage = () => {
       return url;
     });
     setResult(null);
+    setRerolls(0);
+  };
+
+  const runJudge = () => {
+    setJudging(true);
+    setResult(null);
+    window.setTimeout(() => {
+      setResult(mockJudge(memo, tone));
+      setJudging(false);
+    }, 900);
   };
 
   const onJudge = () => {
-    setJudging(true);
-    setResult(null);
-    setTimeout(() => {
-      setResult(mockJudge(memo));
-      setJudging(false);
-    }, 900);
+    setRerolls(0);
+    runJudge();
+  };
+
+  const onReroll = () => {
+    if (rerolls >= MAX_REROLLS) return;
+    setRerolls((n) => n + 1);
+    runJudge();
   };
 
   const onReset = () => {
@@ -44,8 +79,49 @@ const AddDeedPage = () => {
     setPreview(null);
     setMemo("");
     setResult(null);
+    setRerolls(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const onSave = () => {
+    if (!result) return;
+
+    if (capEnabled && stats.today + result.score > DAILY_CAP) {
+      showToast("오늘은 충분히 쌓았어요. 내일 또 봐요.");
+      return;
+    }
+
+    const prevTotal = stats.total;
+    addDeed({
+      memo: memo || undefined,
+      score: result.score,
+      comment: result.comment,
+      tags: result.tags,
+      photoUrl: preview ?? undefined,
+    });
+    const unlock = getRecentlyUnlocked(prevTotal, prevTotal + result.score);
+
+    if (unlock) {
+      setUnlocked(unlock);
+      setSheetOpen(true);
+      // We do NOT auto-navigate when sheet is open — user taps 계속.
+    } else {
+      showToast(`저장됐어요. +${result.score}덕`);
+      window.setTimeout(() => {
+        router.push("/");
+      }, 1400);
+    }
+  };
+
+  const onSheetClose = () => {
+    setSheetOpen(false);
+    setUnlocked(null);
+    window.setTimeout(() => {
+      router.push("/");
+    }, 200);
+  };
+
+  const rerollsLeft = MAX_REROLLS - rerolls;
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
@@ -66,16 +142,17 @@ const AddDeedPage = () => {
           className="relative flex aspect-[4/5] w-full cursor-pointer items-center justify-center bg-muted text-muted-foreground"
         >
           {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={preview}
-              alt="업로드한 인증 사진 미리보기"
+              alt="오늘의 한 컷 미리보기"
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
             <div className="flex flex-col items-center gap-2 text-sm">
               <ImagePlus className="h-8 w-8" aria-hidden />
-              <span>인증 사진을 골라주세요</span>
-              <span className="text-[11px] text-muted-foreground">카메라 또는 갤러리</span>
+              <span>오늘의 한 컷, 골라주세요</span>
+              <span className="text-[11px] text-muted-foreground">카메라 또는 갤러리에서</span>
             </div>
           )}
           <input
@@ -97,13 +174,13 @@ const AddDeedPage = () => {
         <textarea
           id="memo"
           rows={2}
-          placeholder="뭐 했어요? 짧게 적어주세요."
+          placeholder="뭐 했어요? 한 줄이면 충분해요."
           value={memo}
           maxLength={120}
           onChange={(e) => setMemo(e.target.value)}
           className="mt-1 w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
         />
-        <div className="mt-1 text-right text-[10px] text-muted-foreground">{memo.length}/120</div>
+        <div className="mt-1 text-right text-[10px] text-muted-foreground tabular-nums">{memo.length}/120</div>
       </Card>
 
       <div className="flex gap-2">
@@ -116,7 +193,7 @@ const AddDeedPage = () => {
           {judging ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              채점 중...
+              보는 중...
             </>
           ) : (
             <>
@@ -140,12 +217,12 @@ const AddDeedPage = () => {
       {result && (
         <Card className="animate-virtue-pop px-5 py-5">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">AI 채점 결과</p>
+            <p className="text-xs text-muted-foreground">AI가 본 오늘</p>
             <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
               mock
             </span>
           </div>
-          <div className="mt-1 flex items-baseline gap-1.5">
+          <div className="mt-1 flex items-baseline gap-2">
             <span
               className="text-4xl font-bold tabular-nums"
               style={{ color: result.score === 0 ? "var(--negative)" : "var(--ui-amber)" }}
@@ -154,16 +231,16 @@ const AddDeedPage = () => {
               {result.score}
             </span>
             <span className="text-base text-muted-foreground">덕</span>
+            <span className="ml-auto">
+              <ScorePill score={result.score} size="sm" />
+            </span>
           </div>
           <p className="mt-2 text-sm leading-relaxed">{result.comment}</p>
           {result.tags.length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-1.5">
               {result.tags.map((t) => (
-                <li
-                  key={t}
-                  className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
-                >
-                  #{t}
+                <li key={t}>
+                  <TagChip>#{t}</TagChip>
                 </li>
               ))}
             </ul>
@@ -178,16 +255,21 @@ const AddDeedPage = () => {
             </button>
             <button
               type="button"
-              onClick={onJudge}
-              className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground"
+              onClick={onReroll}
+              disabled={rerollsLeft <= 0 || judging}
+              className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground disabled:opacity-40"
+              aria-label={rerollsLeft > 0 ? `한 번 더 (${rerollsLeft}회 남음)` : "한 번 더 (소진)"}
+              title={rerollsLeft > 0 ? `남은 횟수 ${rerollsLeft}` : "이번 채점은 여기까지"}
             >
-              <RotateCw className="h-3.5 w-3.5" aria-hidden />한 번 더
+              <RotateCw className="h-3.5 w-3.5" aria-hidden />
+              한 번 더
+              {rerollsLeft < MAX_REROLLS && (
+                <span className="tabular-nums">({rerollsLeft})</span>
+              )}
             </button>
             <button
               type="button"
-              onClick={() => {
-                onReset();
-              }}
+              onClick={onSave}
               className="flex flex-1 items-center justify-center rounded-xl bg-[var(--positive)] px-3 py-2 text-xs font-semibold text-white"
             >
               저장
@@ -198,9 +280,11 @@ const AddDeedPage = () => {
 
       {!result && !preview && (
         <p className="px-1 text-[11px] leading-relaxed text-muted-foreground">
-          <Camera className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden /> 사진은 로컬에만 잠시 머물러요. 채점은 mock으로 진행됩니다.
+          <Camera className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden /> 사진은 이 기기에만 잠시 머물러요. 채점은 아직 mock이에요.
         </p>
       )}
+
+      <LevelUpSheet open={sheetOpen} onClose={onSheetClose} species={unlocked} />
     </div>
   );
 };

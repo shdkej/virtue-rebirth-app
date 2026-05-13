@@ -19,3 +19,24 @@ export const formatDateLabel = (iso: string) => {
   const date = new Date(iso);
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
+
+/**
+ * Day-granularity relative label, useful for deed-list section headers.
+ * Returns "오늘" / "어제" / "N일 전" / "M월 D일".
+ */
+export const formatRelativeDay = (iso: string, now?: Date): string => {
+  const base = now ? now.getTime() : NOW;
+  const baseDate = new Date(base);
+  const target = new Date(iso);
+
+  // Strip times — compare calendar days only.
+  const startOf = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+  const diffDays = Math.floor((startOf(baseDate) - startOf(target)) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "오늘";
+  if (diffDays === 1) return "어제";
+  if (diffDays > 1 && diffDays < 7) return `${diffDays}일 전`;
+  return `${target.getMonth() + 1}월 ${target.getDate()}일`;
+};

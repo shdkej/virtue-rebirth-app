@@ -1,14 +1,50 @@
 "use client";
 
-import { useState } from "react";
 import { Download, MessageCircle, Moon, Sparkles, Sun } from "lucide-react";
 import { Card } from "@/components/card";
 import { cn } from "@/lib/cn";
+import {
+  clearDeeds,
+  exportJson,
+  useDailyCapEnabled,
+  useTheme,
+  useTone,
+} from "@/lib/store";
+import { showToast } from "@/components/toast";
 
 const MePage = () => {
-  const [tone, setTone] = useState<"soft" | "casual">("soft");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [dailyCap, setDailyCap] = useState(true);
+  const [tone, setTone] = useTone();
+  const [theme, setTheme] = useTheme();
+  const [dailyCap, setDailyCap] = useDailyCapEnabled();
+
+  const onExport = () => {
+    try {
+      const json = exportJson();
+      if (typeof window === "undefined") return;
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `virtue-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      showToast("export.json 챙겨드렸어요.");
+    } catch {
+      showToast("내보내기가 잠깐 막혔어요. 다시 한 번 눌러주세요.");
+    }
+  };
+
+  const onClear = () => {
+    if (typeof window === "undefined") return;
+    const ok = window.confirm(
+      "지금까지 쌓은 덕행 기록을 모두 지울게요. 되돌릴 수 없어요. 진행할까요?",
+    );
+    if (!ok) return;
+    clearDeeds();
+    showToast("기록을 비웠어요.");
+  };
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
@@ -56,7 +92,7 @@ const MePage = () => {
           하루 30덕 상한
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          몰아치기 방지. 끄면 무제한 — 추천하지 않아요.
+          몰아치기 방지용. 끄면 무제한이지만, 그게 재미있을지는...
         </p>
         <label className="mt-3 flex cursor-pointer items-center justify-between">
           <span className="text-sm">활성화</span>
@@ -65,7 +101,7 @@ const MePage = () => {
               "relative inline-flex h-6 w-11 items-center rounded-full transition",
               dailyCap ? "bg-[var(--positive)]" : "bg-muted",
             )}
-            onClick={() => setDailyCap((p) => !p)}
+            onClick={() => setDailyCap(!dailyCap)}
             role="switch"
             aria-checked={dailyCap}
           >
@@ -106,9 +142,6 @@ const MePage = () => {
             </button>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-muted-foreground">
-          (MVP에서는 토글만 — 실제 테마 적용은 후속)
-        </p>
       </Card>
 
       <Card className="px-5 py-4">
@@ -117,15 +150,26 @@ const MePage = () => {
           데이터 내보내기
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          덕행 기록을 JSON으로 받아보세요. (mock)
+          덕행 전부 JSON으로 챙겨가세요. (아직 mock)
         </p>
         <button
           type="button"
-          className="mt-3 w-full rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground"
+          onClick={onExport}
+          className="mt-3 w-full rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
         >
           export.json 다운로드
         </button>
       </Card>
+
+      <div className="pt-2 text-center">
+        <button
+          type="button"
+          onClick={onClear}
+          className="text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
+          기록 초기화
+        </button>
+      </div>
 
       <p className="px-1 pt-2 text-center text-[11px] text-muted-foreground">
         v0.1.0 · Brush Up Life에서 영감받음

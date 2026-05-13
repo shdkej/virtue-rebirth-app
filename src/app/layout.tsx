@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@/styles/globals.css";
 import { BottomNav } from "@/components/bottom-nav";
+import { ToastViewport } from "@/components/toast";
 
 export const metadata: Metadata = {
   title: "덕 쌓기 · 환생",
@@ -14,13 +15,21 @@ export const viewport: Viewport = {
   themeColor: "#fafafa",
 };
 
+// Inline script to apply theme class before hydration — avoids flash.
+// Keeps in sync with `THEME_KEY` in src/lib/store.ts ("virtue.theme.v1").
+const THEME_INIT_SCRIPT = `(()=>{try{var t=localStorage.getItem('virtue.theme.v1');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`;
+
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="ko">
+    <head>
+      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+    </head>
     <body>
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background">
         <main className="flex-1 pb-24">{children}</main>
         <BottomNav />
       </div>
+      <ToastViewport />
     </body>
   </html>
 );
