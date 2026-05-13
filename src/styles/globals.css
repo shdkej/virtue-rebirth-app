@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.875rem;
+  --background: oklch(0.995 0.003 287);
+  --foreground: oklch(0.145 0.01 287);
+  --card: oklch(0.995 0.003 287);
+  --card-foreground: oklch(0.145 0.01 287);
+  --muted: oklch(0.965 0.006 287);
+  --muted-foreground: oklch(0.556 0.01 287);
+  --border: oklch(0.922 0.008 287);
+  --input: oklch(0.922 0.008 287);
+  --ring: oklch(0.556 0.012 287);
+
+  --ui-blue: oklch(0.596 0.068 243.5);
+  --ui-teal: oklch(0.589 0.071 171.9);
+  --ui-coral: oklch(0.624 0.079 44);
+  --ui-amber: oklch(0.606 0.086 82.8);
+  --ui-purple: oklch(0.608 0.065 287.5);
+  --ui-pink: oklch(0.601 0.081 358.3);
+  --ui-green: oklch(0.594 0.093 131.6);
+  --ui-gray: oklch(0.619 0.012 100.9);
+  --ui-red: oklch(0.592 0.101 20.5);
+
+  --brand: var(--ui-purple);
+  --positive: var(--ui-teal);
+  --negative: var(--ui-red);
+  --accent-color: var(--ui-amber);
+}
+
+.dark {
+  --background: oklch(0.13 0.008 287);
+  --foreground: oklch(0.97 0.003 287);
+  --card: oklch(0.17 0.009 287);
+  --card-foreground: oklch(0.97 0.003 287);
+  --muted: oklch(0.21 0.008 287);
+  --muted-foreground: oklch(0.7 0.012 287);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.6 0.04 287);
+
+  --ui-blue: oklch(0.69 0.056 243.5);
+  --ui-teal: oklch(0.69 0.07 171.5);
+  --ui-coral: oklch(0.711 0.071 43.9);
+  --ui-amber: oklch(0.715 0.081 78);
+  --ui-purple: oklch(0.71 0.051 289);
+  --ui-pink: oklch(0.704 0.069 359.6);
+  --ui-green: oklch(0.694 0.087 130.6);
+  --ui-gray: oklch(0.708 0.01 100.1);
+  --ui-red: oklch(0.703 0.085 19.4);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-accent-color: var(--accent-color);
+  --color-ui-blue: var(--ui-blue);
+  --color-ui-teal: var(--ui-teal);
+  --color-ui-coral: var(--ui-coral);
+  --color-ui-amber: var(--ui-amber);
+  --color-ui-purple: var(--ui-purple);
+  --color-ui-pink: var(--ui-pink);
+  --color-ui-green: var(--ui-green);
+  --color-ui-gray: var(--ui-gray);
+  --color-ui-red: var(--ui-red);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+  --font-sans: "Pretendard", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    cursor: pointer;
+  }
+}
+
+@keyframes virtue-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(8px);
+  }
+  60% {
+    transform: scale(1.04) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-virtue-pop {
+  animation: virtue-pop 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes soft-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-soft-fade {
+  animation: soft-fade 220ms ease-out both;
+}
