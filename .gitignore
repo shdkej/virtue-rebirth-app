@@ -13,3 +13,6 @@ dist/
 next-env.d.ts
 .vercel
 *.tsbuildinfo
+.env.local
+.claude
+posthog-setup-report.md

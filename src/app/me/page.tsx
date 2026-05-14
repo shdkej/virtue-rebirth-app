@@ -10,6 +10,7 @@ import {
   useTheme,
   useTone,
 } from "@/lib/store";
+import posthog from "posthog-js";
 import { showToast } from "@/components/toast";
 
 const MePage = () => {
@@ -30,6 +31,7 @@ const MePage = () => {
       a.click();
       document.body.removeChild(a);
       window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      posthog.capture("data_exported");
       showToast("export.json 챙겨드렸어요.");
     } catch {
       showToast("내보내기가 잠깐 막혔어요. 다시 한 번 눌러주세요.");
@@ -43,6 +45,7 @@ const MePage = () => {
     );
     if (!ok) return;
     clearDeeds();
+    posthog.capture("data_cleared");
     showToast("기록을 비웠어요.");
   };
 
@@ -71,7 +74,7 @@ const MePage = () => {
             <button
               key={t}
               type="button"
-              onClick={() => setTone(t)}
+              onClick={() => { setTone(t); posthog.capture("tone_changed", { tone: t }); }}
               className={cn(
                 "rounded-xl border px-3 py-2 text-sm transition",
                 tone === t
@@ -101,7 +104,7 @@ const MePage = () => {
               "relative inline-flex h-6 w-11 items-center rounded-full transition",
               dailyCap ? "bg-[var(--positive)]" : "bg-muted",
             )}
-            onClick={() => setDailyCap(!dailyCap)}
+            onClick={() => { const next = !dailyCap; setDailyCap(next); posthog.capture("daily_cap_toggled", { enabled: next }); }}
             role="switch"
             aria-checked={dailyCap}
           >
@@ -129,7 +132,7 @@ const MePage = () => {
             <button
               key={t}
               type="button"
-              onClick={() => setTheme(t)}
+              onClick={() => { setTheme(t); posthog.capture("theme_changed", { theme: t }); }}
               className={cn(
                 "rounded-xl border px-3 py-2 text-sm transition",
                 theme === t

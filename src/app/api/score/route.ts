@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ScoreRequestSchema, ScoreResultSchema } from "@/lib/score-schema";
 import { buildSystemPrompt } from "@/lib/score-prompt";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -89,6 +90,12 @@ export async function POST(req: Request) {
       );
     }
 
+    getPostHogClient().capture({
+      distinctId: "server",
+      event: "deed_scored",
+      properties: { score: validated.data.score, model, tone_mode: toneMode },
+    });
+
     return Response.json({
       source: "ai",
       model,
@@ -96,6 +103,11 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
+    getPostHogClient().capture({
+      distinctId: "server",
+      event: "deed_score_failed",
+      properties: { error: "ai_call_failed", message, model },
+    });
     return Response.json(
       { error: "ai_call_failed", message },
       { status: 502 },

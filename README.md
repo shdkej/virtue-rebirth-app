@@ -24,7 +24,7 @@ pnpm start       # 프로덕션 서버 (build 후)
 
 ## 스택
 
-- Next.js 15 (App Router) + React 19 + TypeScript
+- Next.js 16 (App Router, Turbopack) + React 19.2 + TypeScript
 - Tailwind CSS v4 + OKLCH 토큰 + Pretendard Variable
 - lucide-react 아이콘
 - 기본 운영은 mock 채점. `NEXT_PUBLIC_SCORING_MODE=ai` 설정 시 Claude Vision 서버사이드 `/api/score` (Anthropic SDK + zod)를 호출하고 실패하면 mock 폴백.

@@ -9,6 +9,7 @@ import { ScorePill } from "@/components/score-pill";
 import { TagChip } from "@/components/tag-chip";
 import { LevelUpSheet } from "@/components/level-up-sheet";
 import { showToast } from "@/components/toast";
+import posthog from "posthog-js";
 import { judgeWithFallback, type IJudgeOutcome } from "@/lib/score-client";
 import {
   addDeed,
@@ -72,12 +73,15 @@ const AddDeedPage = () => {
 
   const onJudge = () => {
     setRerolls(0);
+    posthog.capture("deed_judged", { has_photo: !!file, has_memo: memo.length > 0, tone });
     runJudge();
   };
 
   const onReroll = () => {
     if (rerolls >= MAX_REROLLS) return;
-    setRerolls((n) => n + 1);
+    const next = rerolls + 1;
+    setRerolls(next);
+    posthog.capture("deed_rerolled", { reroll_number: next, rerolls_left: MAX_REROLLS - next });
     runJudge();
   };
 
@@ -95,6 +99,7 @@ const AddDeedPage = () => {
     if (!result) return;
 
     if (capEnabled && stats.today + result.score > DAILY_CAP) {
+      posthog.capture("deed_save_capped", { score: result.score, today_total: stats.today });
       showToast("오늘은 충분히 쌓았어요. 내일 또 봐요.");
       return;
     }
@@ -109,7 +114,16 @@ const AddDeedPage = () => {
     });
     const unlock = getRecentlyUnlocked(prevTotal, prevTotal + result.score);
 
+    posthog.capture("deed_saved", {
+      score: result.score,
+      source: result.source,
+      tags: result.tags,
+      level_up: !!unlock,
+      new_species: unlock?.name ?? null,
+    });
+
     if (unlock) {
+      posthog.capture("level_up_viewed", { species: unlock.name, stage: unlock.stage });
       setUnlocked(unlock);
       setSheetOpen(true);
       // We do NOT auto-navigate when sheet is open — user taps 계속.
