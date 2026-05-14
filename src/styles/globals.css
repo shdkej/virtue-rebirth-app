@@ -171,3 +171,12 @@ body {
   background-size: 200% 100%;
   animation: shine 2.8s ease-in-out infinite;
 }
+
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50%      { transform: scale(1.025); filter: brightness(1.06); }
+}
+.animate-orb-breathe { animation: orb-breathe 4.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-orb-breathe { animation: none; }
+}

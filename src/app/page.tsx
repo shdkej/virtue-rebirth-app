@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Camera, ChevronRight, Sparkles } from "lucide-react";
+import { Camera, ChevronRight, Settings2, Sparkles } from "lucide-react";
 import { Card } from "@/components/card";
 import { ProgressBar } from "@/components/progress-bar";
 import { AnimatedNumber } from "@/components/animated-number";
@@ -21,9 +21,18 @@ const DashboardPage = () => {
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-8 pb-4">
-      <header className="flex flex-col gap-1">
-        <p className="text-xs text-muted-foreground">2026년 5월 13일 수요일</p>
-        <Greeting className="text-lg font-semibold tracking-tight" />
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <p className="text-xs text-muted-foreground">2026년 5월 13일 수요일</p>
+          <Greeting className="text-lg font-semibold tracking-tight" />
+        </div>
+        <Link
+          href="/me"
+          aria-label="설정"
+          className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          <Settings2 className="h-4 w-4" aria-hidden />
+        </Link>
       </header>
 
       <Card className="relative overflow-hidden px-5 py-6">

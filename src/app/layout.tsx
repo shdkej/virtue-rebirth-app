@@ -26,7 +26,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
     </head>
     <body>
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background">
-        <main className="flex-1 pb-24">{children}</main>
+        <main className="flex-1 pb-28">{children}</main>
         <BottomNav />
       </div>
       <ToastViewport />
