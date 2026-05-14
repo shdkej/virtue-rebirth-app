@@ -27,8 +27,8 @@ pnpm start       # 프로덕션 서버 (build 후)
 - Next.js 15 (App Router) + React 19 + TypeScript
 - Tailwind CSS v4 + OKLCH 토큰 + Pretendard Variable
 - lucide-react 아이콘
-- Claude Vision 채점 — 서버사이드 `/api/score` (Anthropic SDK + zod). 키 없으면 mock 폴백.
-- 데이터는 로컬 localStorage (외부 DB 없음)
+- 기본 운영은 mock 채점. `NEXT_PUBLIC_SCORING_MODE=ai` 설정 시 Claude Vision 서버사이드 `/api/score` (Anthropic SDK + zod)를 호출하고 실패하면 mock 폴백.
+- 데이터는 로컬 localStorage (외부 DB/사진 저장소 없음 — 추후 변경 예정)
 
 ## 메뉴 (5개, 하단 탭)
 
@@ -50,7 +50,9 @@ pnpm start       # 프로덕션 서버 (build 후)
 
 ## AI 채점 (Claude Vision)
 
-`/api/score` (POST) — 서버사이드 Node 런타임. 요청·응답 모두 zod로 검증.
+현재 배포 기본값은 `NEXT_PUBLIC_SCORING_MODE=mock` 입니다. 이 경우 사진을 업로드해도 외부 AI를 호출하지 않고 mock 채점만 사용합니다.
+
+`NEXT_PUBLIC_SCORING_MODE=ai` 로 바꾸면 `/api/score` (POST)를 호출합니다. 이 API는 서버사이드 Node 런타임이며 요청·응답 모두 zod로 검증합니다.
 
 요청:
 
@@ -84,7 +86,8 @@ pnpm start       # 프로덕션 서버 (build 후)
 
 | 키 | 기본값 | 설명 |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | (없음) | 비어 있으면 mock 폴백. |
+| `NEXT_PUBLIC_SCORING_MODE` | `mock` | `mock`이면 외부 AI 호출 없이 mock 채점. `ai`이면 `/api/score` 호출 후 실패 시 mock 폴백. |
+| `ANTHROPIC_API_KEY` | (없음) | `NEXT_PUBLIC_SCORING_MODE=ai`일 때 Claude Vision 호출용. |
 | `SCORING_MODEL` | `claude-sonnet-4-6` | 사용할 Claude 모델 ID. |
 
 `.env.example` 참조.
@@ -115,10 +118,15 @@ src/
 └── styles/globals.css      # OKLCH 토큰 + 커스텀 키프레임
 ```
 
+## 현재 배포 결정
+
+- 일단 배포: `https://virtue.oracle.shdkej.com`
+- 사진/외부 저장소: 사용하지 않음. 현재는 localStorage 중심으로 테스트하고 추후 변경.
+- 채점: 일단 mock으로 테스트. Claude Vision은 나중에 켜기.
+
 ## 다음 단계
 
 - 사진 영속화 (Supabase Storage / Cloudflare R2) — 현재 사진은 blob URL preview만.
 - 서버 측 일일 30덕 캡 검증 (현재는 클라이언트 가드만).
 - shadcn/ui base-nova 컴포넌트 도입 (Drawer로 업로드 모달 교체)
-- 배포 도메인 결정 (`virtue.oracle.shdkej.com` 후보)
 - 친구 공유 / 도전 과제 / 푸시 (MVP 이후)

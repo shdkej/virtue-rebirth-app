@@ -38,6 +38,10 @@ export const judgeWithFallback = async (params: {
     return { ...mockJudge(memo, tone), source: "mock" };
   }
 
+  if (process.env.NEXT_PUBLIC_SCORING_MODE !== "ai") {
+    return { ...mockJudge(memo, tone), source: "mock" };
+  }
+
   try {
     const { base64, mimeType } = await fileToBase64(file);
     const res = await fetch("/api/score", {
