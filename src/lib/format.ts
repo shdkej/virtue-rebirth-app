@@ -1,8 +1,6 @@
-const NOW = new Date("2026-05-13T18:00:00+09:00").getTime();
-
 export const formatTimeAgo = (iso: string) => {
   const t = new Date(iso).getTime();
-  const diff = NOW - t;
+  const diff = Date.now() - t;
   const m = Math.floor(diff / 60000);
   if (m < 1) return "방금";
   if (m < 60) return `${m}분 전`;
@@ -25,8 +23,7 @@ export const formatDateLabel = (iso: string) => {
  * Returns "오늘" / "어제" / "N일 전" / "M월 D일".
  */
 export const formatRelativeDay = (iso: string, now?: Date): string => {
-  const base = now ? now.getTime() : NOW;
-  const baseDate = new Date(base);
+  const baseDate = now ?? new Date();
   const target = new Date(iso);
 
   // Strip times — compare calendar days only.

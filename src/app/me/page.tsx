@@ -1,6 +1,7 @@
 "use client";
 
-import { Download, MessageCircle, Moon, Sparkles, Sun } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Download, MessageCircle, Moon, Sparkles, Sun } from "lucide-react";
 import { Card } from "@/components/card";
 import { cn } from "@/lib/cn";
 import {
@@ -9,7 +10,9 @@ import {
   useDailyCapEnabled,
   useTheme,
   useTone,
+  useVirtueStats,
 } from "@/lib/store";
+import { getSpeciesFor } from "@/lib/species";
 import posthog from "posthog-js";
 import { showToast } from "@/components/toast";
 
@@ -17,6 +20,8 @@ const MePage = () => {
   const [tone, setTone] = useTone();
   const [theme, setTheme] = useTheme();
   const [dailyCap, setDailyCap] = useDailyCapEnabled();
+  const stats = useVirtueStats();
+  const { current } = getSpeciesFor(stats.total);
 
   const onExport = () => {
     try {
@@ -51,9 +56,19 @@ const MePage = () => {
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
-      <header className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--brand),transparent_85%)] text-xl">
-          🦔
+      <header className="flex items-center gap-2">
+        <Link
+          href="/"
+          aria-label="대시보드로 돌아가기"
+          className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--brand),transparent_85%)] text-xl"
+          aria-label={`현재 단계: ${current.name}`}
+        >
+          {current.emoji}
         </div>
         <div className="flex flex-col">
           <h1 className="text-base font-semibold">나</h1>

@@ -25,6 +25,11 @@ interface ISnapshot {
 // ---------- Server-safe environment guards ----------------------------------
 const isBrowser = (): boolean => typeof window !== "undefined";
 
+// Demo seed is opt-in. Default (prod) starts users with an empty store so
+// first-time users don't see fake history that isn't theirs.
+const SHOW_DEMO = process.env.NEXT_PUBLIC_SHOW_DEMO === "1";
+const SEED_DEEDS: IDeed[] = SHOW_DEMO ? MOCK_DEEDS : [];
+
 // ---------- Internal pub-sub ------------------------------------------------
 type IListener = () => void;
 const listeners = new Set<IListener>();
@@ -61,22 +66,22 @@ let cachedDeeds: IDeed[] | null = null;
 let cachedSortedRaw: string | null = null;
 let cachedSorted: IDeed[] | null = null;
 
-// SSR fallback snapshot — sorted desc, derived once from MOCK_DEEDS.
-const SEED_SORTED: IDeed[] = [...MOCK_DEEDS].sort(
+// SSR fallback snapshot — sorted desc, derived once from SEED_DEEDS.
+const SEED_SORTED: IDeed[] = [...SEED_DEEDS].sort(
   (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
 );
 
 // ---------- Snapshot reads --------------------------------------------------
 const readSnapshot = (): ISnapshot => {
   if (!isBrowser()) {
-    return { deeds: MOCK_DEEDS, lastSyncedAt: "" };
+    return { deeds: SEED_DEEDS, lastSyncedAt: "" };
   }
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // Seed on first load.
+      // First load: seed only when demo mode is explicitly enabled.
       const seeded: ISnapshot = {
-        deeds: MOCK_DEEDS,
+        deeds: SEED_DEEDS,
         lastSyncedAt: new Date().toISOString(),
       };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
@@ -84,11 +89,11 @@ const readSnapshot = (): ISnapshot => {
     }
     const parsed = JSON.parse(raw) as ISnapshot;
     if (!parsed || !Array.isArray(parsed.deeds)) {
-      return { deeds: MOCK_DEEDS, lastSyncedAt: "" };
+      return { deeds: SEED_DEEDS, lastSyncedAt: "" };
     }
     return parsed;
   } catch {
-    return { deeds: MOCK_DEEDS, lastSyncedAt: "" };
+    return { deeds: SEED_DEEDS, lastSyncedAt: "" };
   }
 };
 
@@ -103,7 +108,7 @@ const writeSnapshot = (snap: ISnapshot) => {
 
 // ---------- getSnapshot helpers (stable refs!) ------------------------------
 const getDeedsSnapshot = (): IDeed[] => {
-  if (!isBrowser()) return MOCK_DEEDS;
+  if (!isBrowser()) return SEED_DEEDS;
   const raw = window.localStorage.getItem(STORAGE_KEY);
   if (raw === cachedDeedsRaw && cachedDeeds) return cachedDeeds;
   cachedDeedsRaw = raw;
@@ -154,7 +159,7 @@ const computeStats = (deeds: IDeed[]): IVirtueStats => {
   };
 };
 
-const SEED_STATS: IVirtueStats = computeStats(MOCK_DEEDS);
+const SEED_STATS: IVirtueStats = computeStats(SEED_DEEDS);
 
 const getStatsSnapshot = (): IVirtueStats => {
   if (!isBrowser()) return SEED_STATS;
@@ -218,7 +223,7 @@ export const clearDeeds = (): void => {
 
 export const exportJson = (): string => {
   if (!isBrowser()) {
-    return JSON.stringify({ deeds: MOCK_DEEDS, lastSyncedAt: "" }, null, 2);
+    return JSON.stringify({ deeds: SEED_DEEDS, lastSyncedAt: "" }, null, 2);
   }
   return JSON.stringify(readSnapshot(), null, 2);
 };

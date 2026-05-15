@@ -13,7 +13,14 @@ export const BottomNav = () => {
   const { current, progress } = getSpeciesFor(stats.total);
   const progressPct = Math.round(progress * 100);
 
-  const leftActive = pathname === "/";
+  // Left column covers "나의 덕" surfaces: dashboard, deed log, and the
+  // profile/settings page (reached via the dashboard gear). Keeping all three
+  // mapped to the left slot avoids the prior "no active highlight anywhere"
+  // dead state on /deeds and /me.
+  const leftActive =
+    pathname === "/" ||
+    pathname.startsWith("/deeds") ||
+    pathname.startsWith("/me");
   const centerActive = pathname.startsWith("/add");
   const rightActive = pathname.startsWith("/dex");
 

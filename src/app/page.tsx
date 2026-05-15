@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Camera, ChevronRight, Settings2, Sparkles } from "lucide-react";
 import { Card } from "@/components/card";
@@ -13,17 +14,33 @@ import { getSpeciesFor } from "@/lib/species";
 import { useDeeds, useVirtueStats } from "@/lib/store";
 import { formatTimeAgo } from "@/lib/format";
 
+const WEEKDAYS_KO = ["일", "월", "화", "수", "목", "금", "토"] as const;
+
+const formatKoreanDate = (d: Date): string =>
+  `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${WEEKDAYS_KO[d.getDay()]}요일`;
+
 const DashboardPage = () => {
   const stats = useVirtueStats();
   const deeds = useDeeds();
   const { current, next, progress } = getSpeciesFor(stats.total);
   const recent = deeds.slice(0, 3);
 
+  // Render the date on the client to avoid SSR/client timezone drift.
+  const [todayLabel, setTodayLabel] = useState<string>("");
+  useEffect(() => {
+    setTodayLabel(formatKoreanDate(new Date()));
+  }, []);
+
   return (
     <div className="flex flex-col gap-4 px-5 pt-8 pb-4">
       <header className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">2026년 5월 13일 수요일</p>
+          <p
+            className="text-xs text-muted-foreground"
+            suppressHydrationWarning
+          >
+            {todayLabel || " "}
+          </p>
           <Greeting className="text-lg font-semibold tracking-tight" />
         </div>
         <Link
@@ -45,11 +62,17 @@ const DashboardPage = () => {
           />
           <span className="text-base text-muted-foreground">덕</span>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          이번 달 <span className="text-foreground">+{stats.month}덕</span>
-          {" · "}
-          어제 <span className="text-foreground">+{stats.yesterday}덕</span>
-        </p>
+        {stats.count === 0 ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            아직 비어있어요. 오늘 1덕만 시작해볼까요?
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-muted-foreground">
+            이번 달 <span className="text-foreground">+{stats.month}덕</span>
+            {" · "}
+            어제 <span className="text-foreground">+{stats.yesterday}덕</span>
+          </p>
+        )}
       </Card>
 
       <Card className="px-5 py-5">

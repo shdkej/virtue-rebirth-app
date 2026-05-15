@@ -72,7 +72,7 @@ const DexPage = () => {
                       )}
                     </div>
                     <span className="text-[11px] text-muted-foreground">
-                      {isLocked ? "다음 생의 비밀." : s.blurb}
+                      {isLocked ? (s.nextHint ?? "다음 생의 비밀.") : s.blurb}
                     </span>
                   </div>
                   <span className="text-right text-[10px] text-muted-foreground tabular-nums">

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import { Card } from "@/components/card";
 import { ScorePill } from "@/components/score-pill";
 import { TagChip } from "@/components/tag-chip";
@@ -26,11 +26,20 @@ const DeedsPage = () => {
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-base font-semibold">덕행록</h1>
-        <p className="text-xs text-muted-foreground">
-          최근 {deeds.length}건 · 누계 +{totalScore}덕
-        </p>
+      <header className="flex items-start gap-2">
+        <Link
+          href="/"
+          aria-label="대시보드로 돌아가기"
+          className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-base font-semibold">덕행록</h1>
+          <p className="text-xs text-muted-foreground">
+            최근 {deeds.length}건 · 누계 +{totalScore}덕
+          </p>
+        </div>
       </header>
 
       {deeds.length === 0 ? (

@@ -22,6 +22,13 @@ import { getRecentlyUnlocked, type ISpecies } from "@/lib/species";
 
 const MAX_REROLLS = 3;
 
+// AI vs mock label. In mock mode we don't promise "AI 채점" since the runtime
+// returns mock judgements. NEXT_PUBLIC_SCORING_MODE is the same env the
+// score-client uses to actually decide.
+const IS_AI_MODE = process.env.NEXT_PUBLIC_SCORING_MODE === "ai";
+const JUDGE_LABEL = IS_AI_MODE ? "AI 채점" : "임시 판정";
+const JUDGE_HEADER = IS_AI_MODE ? "AI가 본 오늘" : "임시 판정 결과";
+
 const AddDeedPage = () => {
   const router = useRouter();
   const [tone] = useTone();
@@ -144,6 +151,10 @@ const AddDeedPage = () => {
   };
 
   const rerollsLeft = MAX_REROLLS - rerolls;
+  const wouldExceedCap =
+    !!result &&
+    capEnabled &&
+    stats.today + result.score > DAILY_CAP;
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
@@ -220,7 +231,7 @@ const AddDeedPage = () => {
           ) : (
             <>
               <Sparkles className="h-4 w-4" aria-hidden />
-              AI 채점
+              {JUDGE_LABEL}
             </>
           )}
         </button>
@@ -239,7 +250,7 @@ const AddDeedPage = () => {
       {result && (
         <Card className="animate-virtue-pop px-5 py-5">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">AI가 본 오늘</p>
+            <p className="text-xs text-muted-foreground">{JUDGE_HEADER}</p>
             <span
               className="rounded-full px-2 py-0.5 text-[10px]"
               style={
@@ -254,7 +265,6 @@ const AddDeedPage = () => {
                       color: "var(--muted-foreground)",
                     }
               }
-              title={result.source === "ai" && result.model ? result.model : undefined}
             >
               {result.source === "ai" ? "AI" : "mock"}
             </span>
@@ -282,6 +292,11 @@ const AddDeedPage = () => {
               ))}
             </ul>
           )}
+          {result.source === "ai" && result.model && (
+            <p className="mt-2 text-[10px] text-muted-foreground tabular-nums">
+              모델 · {result.model}
+            </p>
+          )}
           <div className="mt-4 flex gap-2">
             <button
               type="button"
@@ -295,23 +310,30 @@ const AddDeedPage = () => {
               onClick={onReroll}
               disabled={rerollsLeft <= 0 || judging}
               className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground disabled:opacity-40"
-              aria-label={rerollsLeft > 0 ? `한 번 더 (${rerollsLeft}회 남음)` : "한 번 더 (소진)"}
-              title={rerollsLeft > 0 ? `남은 횟수 ${rerollsLeft}` : "이번 채점은 여기까지"}
+              aria-label={
+                rerollsLeft > 0
+                  ? `한 번 더 · ${rerollsLeft}회 남음`
+                  : "한 번 더 (소진)"
+              }
             >
               <RotateCw className="h-3.5 w-3.5" aria-hidden />
-              한 번 더
-              {rerollsLeft < MAX_REROLLS && (
-                <span className="tabular-nums">({rerollsLeft})</span>
-              )}
+              <span>한 번 더</span>
+              <span className="tabular-nums">· {rerollsLeft}회 남음</span>
             </button>
             <button
               type="button"
               onClick={onSave}
-              className="flex flex-1 items-center justify-center rounded-xl bg-[var(--positive)] px-3 py-2 text-xs font-semibold text-white"
+              disabled={wouldExceedCap}
+              className="flex flex-1 items-center justify-center rounded-xl bg-[var(--positive)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
             >
               저장
             </button>
           </div>
+          {wouldExceedCap && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              오늘은 충분히 쌓았어요. 내일 또 봐요. (오늘 {stats.today}/{DAILY_CAP}덕)
+            </p>
+          )}
         </Card>
       )}
 
