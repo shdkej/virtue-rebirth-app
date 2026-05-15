@@ -67,12 +67,32 @@ const AddDeedPage = () => {
   const runJudge = async () => {
     setJudging(true);
     setResult(null);
+    const startedAt = Date.now();
     try {
       const outcome = await judgeWithFallback({ file, memo, tone });
       setResult(outcome);
+      posthog.capture("deed_judge_completed", {
+        score: outcome.score,
+        source: outcome.source,
+        fallback_reason: outcome.fallbackReason ?? null,
+        model: outcome.model ?? null,
+        has_photo: !!file,
+        tone,
+        memo_length: memo.trim().length,
+        retry_count: rerolls,
+        duration_ms: Date.now() - startedAt,
+      });
       if (outcome.fallbackReason) {
         showToast("AI가 잠깐 졸고 있어요. 임시 판정으로 보여드릴게요.");
       }
+    } catch (err) {
+      // judgeWithFallback already returns mock on failure, but guard anyway.
+      posthog.captureException(err instanceof Error ? err : new Error(String(err)), {
+        flow: "deed-judge",
+        has_photo: !!file,
+        tone,
+      });
+      throw err;
     } finally {
       setJudging(false);
     }
@@ -80,7 +100,13 @@ const AddDeedPage = () => {
 
   const onJudge = () => {
     setRerolls(0);
-    posthog.capture("deed_judged", { has_photo: !!file, has_memo: memo.length > 0, tone });
+    posthog.capture("deed_judged", {
+      has_photo: !!file,
+      has_memo: memo.trim().length > 0,
+      memo_length: memo.trim().length,
+      tone,
+      scoring_mode: IS_AI_MODE ? "ai" : "mock",
+    });
     runJudge();
   };
 
@@ -124,9 +150,16 @@ const AddDeedPage = () => {
     posthog.capture("deed_saved", {
       score: result.score,
       source: result.source,
+      fallback_reason: result.fallbackReason ?? null,
       tags: result.tags,
+      tag_count: result.tags.length,
+      has_photo: !!preview,
+      tone,
+      memo_length: memo.trim().length,
+      retry_count: rerolls,
       level_up: !!unlock,
       new_species: unlock?.name ?? null,
+      total_after: prevTotal + result.score,
     });
 
     if (unlock) {
