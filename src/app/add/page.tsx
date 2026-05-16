@@ -71,7 +71,7 @@ const AddDeedPage = () => {
     try {
       const outcome = await judgeWithFallback({ file, memo, tone });
       setResult(outcome);
-      posthog.capture("deed_judge_completed", {
+      posthog.capture("deed_judged", {
         score: outcome.score,
         source: outcome.source,
         fallback_reason: outcome.fallbackReason ?? null,
@@ -100,7 +100,7 @@ const AddDeedPage = () => {
 
   const onJudge = () => {
     setRerolls(0);
-    posthog.capture("deed_judged", {
+    posthog.capture("deed_judge_attempted", {
       has_photo: !!file,
       has_memo: memo.trim().length > 0,
       memo_length: memo.trim().length,
