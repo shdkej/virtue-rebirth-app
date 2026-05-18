@@ -1,9 +1,0 @@
-node_modules
-.next
-.git
-.github
-.vercel
-docs
-*.md
-.DS_Store
-.env*
