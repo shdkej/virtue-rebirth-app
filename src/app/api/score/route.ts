@@ -1,22 +1,18 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ScoreRequestSchema, ScoreResultSchema } from "@/lib/score-schema";
-import { buildSystemPrompt } from "@/lib/score-prompt";
+import { ScoreRequestSchema } from "@/lib/score-schema";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-const DEFAULT_MODEL = "claude-sonnet-4-6";
+// 채점 로직은 Lambda(`virtue-rebirth-lambda`)가 단일 출처(SoT).
+// 이 라우트는 얇은 프록시 + 서버측 PostHog 로깅만 담당한다.
+//   - dev:        https://score-dev.virtue.aws.shdkej.com/score
+//   - production: https://score.virtue.aws.shdkej.com/score
+const DEFAULT_LAMBDA_URL = "https://score.virtue.aws.shdkej.com/score";
 
 export async function POST(req: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return Response.json(
-      { error: "scoring_disabled", message: "ANTHROPIC_API_KEY 미설정. 클라이언트는 mock으로 폴백." },
-      { status: 503 },
-    );
-  }
+  const lambdaUrl = process.env.SCORE_LAMBDA_URL ?? DEFAULT_LAMBDA_URL;
 
   let raw: unknown;
   try {
@@ -32,84 +28,55 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  const { imageBase64, mimeType, memo, toneMode = "soft" } = parsed.data;
-
-  const model = process.env.SCORING_MODEL ?? DEFAULT_MODEL;
-  const client = new Anthropic({ apiKey });
-  const systemPrompt = buildSystemPrompt(toneMode);
 
   try {
-    const resp = await client.messages.create({
-      model,
-      max_tokens: 256,
-      system: systemPrompt,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: { type: "base64", media_type: mimeType, data: imageBase64 },
-            },
-            ...(memo
-              ? [{ type: "text" as const, text: `메모: ${memo}` }]
-              : []),
-          ],
+    const upstream = await fetch(lambdaUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(parsed.data),
+    });
+
+    const text = await upstream.text();
+    let body: Record<string, unknown> = {};
+    try { body = JSON.parse(text); } catch { /* keep empty */ }
+
+    if (upstream.ok && typeof body.score === "number") {
+      getPostHogClient().capture({
+        distinctId: "server",
+        event: "deed_scored",
+        properties: {
+          score: body.score,
+          model: body.model ?? null,
+          source: body.source ?? "ai",
+          tone_mode: parsed.data.toneMode ?? "soft",
+          via: "lambda-proxy",
         },
-      ],
-    });
-
-    const text = resp.content
-      .map((b) => (b.type === "text" ? b.text : ""))
-      .join("\n")
-      .trim();
-
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) {
-      return Response.json(
-        { error: "ai_no_json", raw: text },
-        { status: 502 },
-      );
+      });
+    } else {
+      getPostHogClient().capture({
+        distinctId: "server",
+        event: "deed_score_failed",
+        properties: {
+          status: upstream.status,
+          error: body.error ?? "upstream_error",
+          via: "lambda-proxy",
+        },
+      });
     }
 
-    let json: unknown;
-    try {
-      json = JSON.parse(match[0]);
-    } catch {
-      return Response.json(
-        { error: "ai_bad_json", raw: text },
-        { status: 502 },
-      );
-    }
-
-    const validated = ScoreResultSchema.safeParse(json);
-    if (!validated.success) {
-      return Response.json(
-        { error: "ai_invalid_schema", detail: validated.error.issues, raw: text },
-        { status: 502 },
-      );
-    }
-
-    getPostHogClient().capture({
-      distinctId: "server",
-      event: "deed_scored",
-      properties: { score: validated.data.score, model, tone_mode: toneMode },
-    });
-
-    return Response.json({
-      source: "ai",
-      model,
-      ...validated.data,
+    return new Response(text, {
+      status: upstream.status,
+      headers: { "content-type": "application/json" },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
     getPostHogClient().capture({
       distinctId: "server",
       event: "deed_score_failed",
-      properties: { error: "ai_call_failed", message, model },
+      properties: { error: "lambda_unreachable", message },
     });
     return Response.json(
-      { error: "ai_call_failed", message },
+      { error: "lambda_unreachable", message },
       { status: 502 },
     );
   }

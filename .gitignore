@@ -15,5 +15,6 @@ next-env.d.ts
 *.tsbuildinfo
 .env.local
 .claude
+.omc
 posthog-setup-report.md
 design-mockups/
