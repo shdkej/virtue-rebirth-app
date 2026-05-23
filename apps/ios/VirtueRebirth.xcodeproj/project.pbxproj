@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		183A86C353AA6E16C1162FCC /* VirtueRebirthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57DEF2DA60737F93EBF9F73B /* VirtueRebirthApp.swift */; };
+		4F64435EA4C3D7975A306488 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813A870ECCB8BBAF1C6E1DF1 /* Score.swift */; };
+		50B13985D4F8DDE09E20EB33 /* AddDeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0B7387A15AF628CBAFB036 /* AddDeedView.swift */; };
+		59F13C368C93D810D074DEAA /* DeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83671164983792BFB1826426 /* DeedStore.swift */; };
+		7BFE507C81A8E96FFABCFCCE /* Species.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7717C71EBD77ABAE35497887 /* Species.swift */; };
+		7D12469D00A129416005BCE7 /* SpeciesDexView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1538EFFA30B6EC4713816896 /* SpeciesDexView.swift */; };
+		817869CD391552499AB1B25D /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCD0CFC2BC964F62FA23509 /* MeView.swift */; };
+		90CF228EA5805A5C2C75239B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB14C0DBE33739F8EE42A06 /* HomeView.swift */; };
+		9CE538B39FA4188F423DD5EA /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D48504906E1774FA590570D /* Theme.swift */; };
+		9F68C60AD304A0F574C48E84 /* Deed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13C54BF1C72F8BBA13B1036D /* Deed.swift */; };
+		AA30D0871DE261F38BF7B0D9 /* DeedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5676F6149A4AA96715F228 /* DeedListView.swift */; };
+		AD666FAAA08FD34776122646 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F20CE232C88680ECD30F397 /* RootView.swift */; };
+		C3FC679E05A004019DD6B333 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6171A3AEC11A4377710B2E /* Analytics.swift */; };
+		CDFE502213F1DF336DB1DA71 /* ScoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF3B8D9A0DF25C2B07E36CE /* ScoreService.swift */; };
+		E83B170E11EDAD5C3A978DE1 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 476DE0EEBD9AC4863B2AA2FB /* PostHog */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		13C54BF1C72F8BBA13B1036D /* Deed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deed.swift; sourceTree = "<group>"; };
+		1538EFFA30B6EC4713816896 /* SpeciesDexView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesDexView.swift; sourceTree = "<group>"; };
+		2E5676F6149A4AA96715F228 /* DeedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeedListView.swift; sourceTree = "<group>"; };
+		2EB14C0DBE33739F8EE42A06 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		2F6171A3AEC11A4377710B2E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
+		57DEF2DA60737F93EBF9F73B /* VirtueRebirthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtueRebirthApp.swift; sourceTree = "<group>"; };
+		6D48504906E1774FA590570D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		7717C71EBD77ABAE35497887 /* Species.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Species.swift; sourceTree = "<group>"; };
+		7BCD0CFC2BC964F62FA23509 /* MeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
+		813A870ECCB8BBAF1C6E1DF1 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
+		83671164983792BFB1826426 /* DeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeedStore.swift; sourceTree = "<group>"; };
+		8F20CE232C88680ECD30F397 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		CC0B7387A15AF628CBAFB036 /* AddDeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeedView.swift; sourceTree = "<group>"; };
+		DCF3B8D9A0DF25C2B07E36CE /* ScoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreService.swift; sourceTree = "<group>"; };
+		E74E97A2DD92E77E6ADD0CAC /* VirtueRebirth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VirtueRebirth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C1C9D350ECDE047A8FD4AF4F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E83B170E11EDAD5C3A978DE1 /* PostHog in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		198ABEAAC8E58165288FFBE2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				13C54BF1C72F8BBA13B1036D /* Deed.swift */,
+				813A870ECCB8BBAF1C6E1DF1 /* Score.swift */,
+				7717C71EBD77ABAE35497887 /* Species.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		20456EC282C3157E4FA0237C /* App */ = {
+			isa = PBXGroup;
+			children = (
+				8F20CE232C88680ECD30F397 /* RootView.swift */,
+				57DEF2DA60737F93EBF9F73B /* VirtueRebirthApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		23C2215B01D3AA8F75ADF68A /* Me */ = {
+			isa = PBXGroup;
+			children = (
+				7BCD0CFC2BC964F62FA23509 /* MeView.swift */,
+			);
+			path = Me;
+			sourceTree = "<group>";
+		};
+		3C954A4C35DF12642C816D34 /* Deeds */ = {
+			isa = PBXGroup;
+			children = (
+				2E5676F6149A4AA96715F228 /* DeedListView.swift */,
+			);
+			path = Deeds;
+			sourceTree = "<group>";
+		};
+		3F248D2877C735343B00C817 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				2EB14C0DBE33739F8EE42A06 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		42ACE7563BDE9739D1DE00B3 = {
+			isa = PBXGroup;
+			children = (
+				AEF4F8DB5E2037B0AFFAEC8B /* Sources */,
+				730D324E18CAF5F0604F2996 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4C3E154CEAE3BF5970CB8ED8 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				FBCF9A6C2942238FFB23E87D /* Add */,
+				3C954A4C35DF12642C816D34 /* Deeds */,
+				8B0887A277D74BD9F2246854 /* Dex */,
+				3F248D2877C735343B00C817 /* Home */,
+				23C2215B01D3AA8F75ADF68A /* Me */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		730D324E18CAF5F0604F2996 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E74E97A2DD92E77E6ADD0CAC /* VirtueRebirth.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7EE661ED36956D3C5468896B /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				6D48504906E1774FA590570D /* Theme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		8B0887A277D74BD9F2246854 /* Dex */ = {
+			isa = PBXGroup;
+			children = (
+				1538EFFA30B6EC4713816896 /* SpeciesDexView.swift */,
+			);
+			path = Dex;
+			sourceTree = "<group>";
+		};
+		AEF4F8DB5E2037B0AFFAEC8B /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				20456EC282C3157E4FA0237C /* App */,
+				E75AE0140F21023D90C9C410 /* Core */,
+				4C3E154CEAE3BF5970CB8ED8 /* Features */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		CE554A28B2E4064B59533938 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				83671164983792BFB1826426 /* DeedStore.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		E75AE0140F21023D90C9C410 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				198ABEAAC8E58165288FFBE2 /* Models */,
+				EC50EA3B21B72FD90119184A /* Services */,
+				CE554A28B2E4064B59533938 /* Store */,
+				7EE661ED36956D3C5468896B /* Theme */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		EC50EA3B21B72FD90119184A /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2F6171A3AEC11A4377710B2E /* Analytics.swift */,
+				DCF3B8D9A0DF25C2B07E36CE /* ScoreService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		FBCF9A6C2942238FFB23E87D /* Add */ = {
+			isa = PBXGroup;
+			children = (
+				CC0B7387A15AF628CBAFB036 /* AddDeedView.swift */,
+			);
+			path = Add;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3509D612A0440CECD01B80E2 /* VirtueRebirth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 20A1F211EF6CFC2536F7EBAA /* Build configuration list for PBXNativeTarget "VirtueRebirth" */;
+			buildPhases = (
+				020F82237AAC18924FDA12A6 /* Sources */,
+				C1C9D350ECDE047A8FD4AF4F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VirtueRebirth;
+			packageProductDependencies = (
+				476DE0EEBD9AC4863B2AA2FB /* PostHog */,
+			);
+			productName = VirtueRebirth;
+			productReference = E74E97A2DD92E77E6ADD0CAC /* VirtueRebirth.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1C1236A606D6EAF61A8045FB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					3509D612A0440CECD01B80E2 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 00879346EDC722312D150E90 /* Build configuration list for PBXProject "VirtueRebirth" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 42ACE7563BDE9739D1DE00B3;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A4638C3539EC336D2A269BE7 /* XCRemoteSwiftPackageReference "posthog-ios" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 730D324E18CAF5F0604F2996 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3509D612A0440CECD01B80E2 /* VirtueRebirth */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		020F82237AAC18924FDA12A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50B13985D4F8DDE09E20EB33 /* AddDeedView.swift in Sources */,
+				C3FC679E05A004019DD6B333 /* Analytics.swift in Sources */,
+				9F68C60AD304A0F574C48E84 /* Deed.swift in Sources */,
+				AA30D0871DE261F38BF7B0D9 /* DeedListView.swift in Sources */,
+				59F13C368C93D810D074DEAA /* DeedStore.swift in Sources */,
+				90CF228EA5805A5C2C75239B /* HomeView.swift in Sources */,
+				817869CD391552499AB1B25D /* MeView.swift in Sources */,
+				AD666FAAA08FD34776122646 /* RootView.swift in Sources */,
+				4F64435EA4C3D7975A306488 /* Score.swift in Sources */,
+				CDFE502213F1DF336DB1DA71 /* ScoreService.swift in Sources */,
+				7BFE507C81A8E96FFABCFCCE /* Species.swift in Sources */,
+				7D12469D00A129416005BCE7 /* SpeciesDexView.swift in Sources */,
+				9CE538B39FA4188F423DD5EA /* Theme.swift in Sources */,
+				183A86C353AA6E16C1162FCC /* VirtueRebirthApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1EB23C225BC500EF2DE74525 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/VirtueRebirth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				POSTHOG_KEY = "$(POSTHOG_KEY)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.shdkej.virtuerebirth;
+				SCORE_API_URL = "$(SCORE_API_URL)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		822E952E13690138CCB83814 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/VirtueRebirth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				POSTHOG_KEY = "$(POSTHOG_KEY)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.shdkej.virtuerebirth;
+				SCORE_API_URL = "$(SCORE_API_URL)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D2506A12CE4D25D86F74489A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.10;
+			};
+			name = Release;
+		};
+		D623EA793B83B19D056B9482 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.10;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		00879346EDC722312D150E90 /* Build configuration list for PBXProject "VirtueRebirth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D623EA793B83B19D056B9482 /* Debug */,
+				D2506A12CE4D25D86F74489A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		20A1F211EF6CFC2536F7EBAA /* Build configuration list for PBXNativeTarget "VirtueRebirth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				822E952E13690138CCB83814 /* Debug */,
+				1EB23C225BC500EF2DE74525 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A4638C3539EC336D2A269BE7 /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		476DE0EEBD9AC4863B2AA2FB /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A4638C3539EC336D2A269BE7 /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1C1236A606D6EAF61A8045FB /* Project object */;
+}

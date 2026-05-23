@@ -1,34 +1,14 @@
 {
-  "name": "virtue-rebirth-app",
+  "name": "virtue-rebirth",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "next dev -p 8030",
-    "build": "next build",
-    "start": "next start -p 8030",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.469.0",
-    "next": "16.2.6",
-    "posthog-js": "^1.373.4",
-    "posthog-node": "^5.34.1",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^22",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.3"
-  },
-  "packageManager": "pnpm@10.33.0"
+    "dev": "pnpm --filter virtue-rebirth-app dev",
+    "dev:api": "pnpm --filter virtue-rebirth-lambda dev",
+    "build": "pnpm --filter virtue-rebirth-app build",
+    "lint": "pnpm --filter virtue-rebirth-app lint",
+    "typecheck": "pnpm -r typecheck",
+    "deploy:api": "pnpm --filter virtue-rebirth-lambda deploy"
+  }
 }

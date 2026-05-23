@@ -1,19 +1,36 @@
+# 의존성
 node_modules/
+
+# 빌드 산출물
 .next/
 out/
 build/
 dist/
+*.tsbuildinfo
 
+# Next.js
+next-env.d.ts
+.vercel
+
+# SST (api)
+.sst/
+sst-env.d.ts
+
+# 환경변수
+.env
+.env*.local
+
+# Xcode (ios)
+xcuserdata/
+*.xcuserstate
+.build/
+DerivedData/
+
+# 로그/OS
 *.log
 .DS_Store
 
-.env*.local
-.env
-
-next-env.d.ts
-.vercel
-*.tsbuildinfo
-.env.local
+# 에이전트/툴
 .claude
 .omc
 posthog-setup-report.md

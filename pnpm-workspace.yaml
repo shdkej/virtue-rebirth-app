@@ -1,0 +1,11 @@
+packages:
+  - "apps/web"
+  - "apps/api"
+  - "packages/*"
+
+# pnpm v10은 의존성 빌드 스크립트를 기본 차단한다.
+# SST(api)가 aws-sdk 등을 빌드해야 하므로 허용 목록을 명시한다.
+onlyBuiltDependencies:
+  - aws-sdk
+  - esbuild
+  - "@esbuild/darwin-arm64"

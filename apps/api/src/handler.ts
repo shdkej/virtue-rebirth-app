@@ -1,0 +1,101 @@
+import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { z } from "zod";
+import { Resource } from "sst";
+import { buildSystemPrompt } from "./scorePrompt.js";
+
+const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"] as const;
+const RequestSchema = z.object({
+  imageBase64: z.string().min(1).max(7_500_000),
+  mimeType: z.enum(ALLOWED_MIME),
+  memo: z.string().max(500).optional(),
+  toneMode: z.enum(["soft", "casual"]).optional(),
+});
+const ResultSchema = z.object({
+  score: z.number().int().min(0).max(10),
+  comment: z.string().min(1).max(120),
+  tags: z.array(z.string().min(1).max(20)).max(2),
+});
+
+const json = (status: number, body: unknown): APIGatewayProxyResultV2 => ({
+  statusCode: status,
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify(body),
+});
+
+export const handler = async (
+  event: APIGatewayProxyEventV2,
+): Promise<APIGatewayProxyResultV2> => {
+  let raw: unknown;
+  try {
+    const text = event.isBase64Encoded
+      ? Buffer.from(event.body ?? "", "base64").toString("utf8")
+      : event.body ?? "";
+    raw = JSON.parse(text);
+  } catch {
+    return json(400, { error: "invalid_json" });
+  }
+
+  const parsed = RequestSchema.safeParse(raw);
+  if (!parsed.success) return json(400, { error: "invalid_request", detail: parsed.error.issues });
+
+  const { imageBase64, mimeType, memo, toneMode = "soft" } = parsed.data;
+  const primary = process.env.SCORING_MODEL ?? "gemini-3-pro-preview";
+  const fallback = process.env.SCORING_MODEL_FALLBACK ?? "gemini-2.5-flash";
+  const gemini = new GoogleGenerativeAI(Resource.GEMINI_API_KEY.value);
+
+  const call = async (modelName: string) => {
+    const model = gemini.getGenerativeModel({
+      model: modelName,
+      systemInstruction: buildSystemPrompt(toneMode),
+      generationConfig: {
+        responseMimeType: "application/json",
+        maxOutputTokens: 256,
+        temperature: 0.4,
+      },
+    });
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { inlineData: { mimeType, data: imageBase64 } },
+            ...(memo ? [{ text: `메모: ${memo}` }] : []),
+          ],
+        },
+      ],
+    });
+    const text = result.response.text().trim();
+    let aiJson: unknown;
+    try { aiJson = JSON.parse(text); }
+    catch {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error(`ai_no_json: ${text.slice(0, 120)}`);
+      aiJson = JSON.parse(match[0]);
+    }
+    const validated = ResultSchema.safeParse(aiJson);
+    if (!validated.success) throw new Error("ai_invalid_schema");
+    return validated.data;
+  };
+
+  // 1차: primary 모델 → 실패 시 fallback 모델로 재시도
+  try {
+    const data = await call(primary);
+    return json(200, { source: "ai", model: primary, ...data });
+  } catch (primaryErr) {
+    const primaryMsg = primaryErr instanceof Error ? primaryErr.message : "unknown";
+    try {
+      const data = await call(fallback);
+      return json(200, { source: "ai_fallback", model: fallback, primaryError: primaryMsg, ...data });
+    } catch (fallbackErr) {
+      const fallbackMsg = fallbackErr instanceof Error ? fallbackErr.message : "unknown";
+      return json(502, {
+        error: "ai_call_failed",
+        primaryModel: primary,
+        primaryError: primaryMsg,
+        fallbackModel: fallback,
+        fallbackError: fallbackMsg,
+      });
+    }
+  }
+};
