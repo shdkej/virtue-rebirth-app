@@ -44,12 +44,44 @@ const AddDeedPage = () => {
   const [unlocked, setUnlocked] = useState<ISpecies | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Funnel instrumentation: did the user actually save before leaving /add,
+  // and what had they engaged with at unmount? Refs keep the unmount handler
+  // reading the latest values without re-subscribing the mount effect.
+  const savedRef = useRef(false);
+  const engagementRef = useRef({ hadPhoto: false, hadMemo: false, hadJudgment: false });
 
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
+
+  // Keep the latest engagement state available to the unmount handler.
+  useEffect(() => {
+    engagementRef.current = {
+      hadPhoto: !!file,
+      hadMemo: memo.trim().length > 0,
+      hadJudgment: !!result,
+    };
+  }, [file, memo, result]);
+
+  // Add-flow funnel: entry on mount, abandon on unmount when nothing was saved.
+  // Pairs with deed_judge_attempted / deed_judged / deed_saved to locate the
+  // landing → add → judge → save drop-off the activation audit is chasing.
+  useEffect(() => {
+    posthog.capture("add_flow_started", {
+      scoring_mode: IS_AI_MODE ? "ai" : "mock",
+    });
+    return () => {
+      if (savedRef.current) return;
+      const { hadPhoto, hadMemo, hadJudgment } = engagementRef.current;
+      posthog.capture("add_flow_abandoned", {
+        had_photo: hadPhoto,
+        had_memo: hadMemo,
+        had_judgment: hadJudgment,
+      });
+    };
+  }, []);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = e.target.files?.[0];
@@ -145,6 +177,7 @@ const AddDeedPage = () => {
       tags: result.tags,
       photoUrl: preview ?? undefined,
     });
+    savedRef.current = true;
     const unlock = getRecentlyUnlocked(prevTotal, prevTotal + result.score);
 
     posthog.capture("deed_saved", {
