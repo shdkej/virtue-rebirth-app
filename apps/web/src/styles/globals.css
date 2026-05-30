@@ -97,6 +97,17 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* Stop pull-to-refresh / overscroll bounce from yanking the page (and the
+     fixed bottom nav) around during a refresh gesture or viewport change. */
+  overscroll-behavior: none;
+}
+
+body {
+  /* Never let a stray wide child create a page-level horizontal scrollbar. */
+  overflow-x: hidden;
+  /* Keep the shell a full dynamic viewport tall as the address bar / soft
+     keyboard change the viewport, without locking the height. */
+  min-height: 100dvh;
 }
 
 @layer base {

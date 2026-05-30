@@ -12,6 +12,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#fafafa",
+  // Extend the layout under the notch/home-indicator so `env(safe-area-inset-*)`
+  // resolves to real values — the bottom nav relies on the bottom inset.
+  viewportFit: "cover",
 };
 
 // Inline script to apply theme class before hydration — avoids flash.
@@ -25,7 +28,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
     </head>
     <body>
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background">
-        <main className="flex-1 pb-28">{children}</main>
+        {/* Reserve room for the fixed bottom nav (incl. its safe-area inset) so
+            the last bit of scrollable content never hides behind it. */}
+        <main className="flex-1 pb-[calc(7rem+env(safe-area-inset-bottom))]">{children}</main>
         <BottomNav />
       </div>
       <ToastViewport />

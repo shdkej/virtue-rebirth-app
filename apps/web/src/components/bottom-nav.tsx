@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles, Bird } from "lucide-react";
@@ -7,9 +8,40 @@ import { cn } from "@/lib/cn";
 import { useVirtueStats } from "@/lib/store";
 import { getSpeciesFor } from "@/lib/species";
 
+// The soft keyboard typically eats well over this many px of viewport height.
+// Anything smaller (address bar collapsing, browser chrome) shouldn't hide nav.
+const KEYBOARD_MIN_OCCLUSION_PX = 140;
+
+// True while a soft keyboard is (very likely) open, derived from how much of the
+// layout viewport the visual viewport no longer covers. Lets us slide the nav
+// out of the way so it never floats over the keyboard or covers a focused input
+// (notably the memo field on /add).
+const useSoftKeyboardOpen = () => {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const occluded = window.innerHeight - vv.height - vv.offsetTop;
+      setOpen(occluded > KEYBOARD_MIN_OCCLUSION_PX);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
+
+  return open;
+};
+
 export const BottomNav = () => {
   const pathname = usePathname();
   const stats = useVirtueStats();
+  const keyboardOpen = useSoftKeyboardOpen();
   const { current, progress } = getSpeciesFor(stats.total);
   const progressPct = Math.round(progress * 100);
 
@@ -27,7 +59,15 @@ export const BottomNav = () => {
   return (
     <nav
       aria-label="주요 메뉴"
-      className="sticky bottom-0 z-50 mx-auto w-full max-w-md pb-[env(safe-area-inset-bottom)]"
+      aria-hidden={keyboardOpen || undefined}
+      className={cn(
+        // Viewport-anchored (not sticky) so refresh gestures, address-bar show/
+        // hide, and scroll never detach it; centered within the app's max width.
+        "fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2",
+        "pb-[env(safe-area-inset-bottom)] transition-transform duration-200 will-change-transform",
+        // Slide fully below the fold while the soft keyboard is open.
+        keyboardOpen && "pointer-events-none translate-y-full",
+      )}
     >
       <div className="relative">
         <div className="grid grid-cols-[1fr_5.5rem_1fr] items-stretch border-t border-border bg-background/85 backdrop-blur-md">
