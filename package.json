@@ -7,6 +7,7 @@
     "dev": "pnpm --filter virtue-rebirth-app dev",
     "dev:api": "pnpm --filter virtue-rebirth-lambda dev",
     "build": "pnpm --filter virtue-rebirth-app build",
+    "start": "pnpm --filter virtue-rebirth-app start",
     "lint": "pnpm --filter virtue-rebirth-app lint",
     "typecheck": "pnpm -r typecheck",
     "deploy:api": "pnpm --filter virtue-rebirth-lambda deploy"
