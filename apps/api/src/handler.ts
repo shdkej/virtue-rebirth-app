@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { z } from "zod";
 import { Resource } from "sst";
 import { buildSystemPrompt } from "./scorePrompt.js";
@@ -16,6 +16,19 @@ const ResultSchema = z.object({
   comment: z.string().min(1).max(120),
   tags: z.array(z.string().min(1).max(20)).max(2),
 });
+
+// Gemini 출력 구조 강제 (타입/필드/순서). 구조적 schema 위반을 막아
+// primary 호출이 ai_invalid_schema로 떨어져 fallback을 2번 호출하는 낭비를 줄인다.
+// (길이 제약은 Gemini schema가 보장 못 하므로 프롬프트 + zod가 최종 가드)
+const GEMINI_RESPONSE_SCHEMA = {
+  type: SchemaType.OBJECT,
+  properties: {
+    score: { type: SchemaType.INTEGER },
+    comment: { type: SchemaType.STRING },
+    tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+  },
+  required: ["score", "comment", "tags"],
+} as const;
 
 const json = (status: number, body: unknown): APIGatewayProxyResultV2 => ({
   statusCode: status,
@@ -50,6 +63,7 @@ export const handler = async (
       systemInstruction: buildSystemPrompt(toneMode),
       generationConfig: {
         responseMimeType: "application/json",
+        responseSchema: GEMINI_RESPONSE_SCHEMA,
         // gemini-2.5-flash는 thinking 토큰이 출력 예산을 함께 소비한다.
         // 256은 thinking이 다 먹어 JSON이 잘리므로 충분히 키운다 (cap이라 실사용분만 과금).
         maxOutputTokens: 2048,
