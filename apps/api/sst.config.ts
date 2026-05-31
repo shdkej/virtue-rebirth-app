@@ -45,7 +45,9 @@ export default $config({
       concurrency: { reserved: SCORE_MAX_CONCURRENCY },
       link: [geminiKey],
       environment: {
-        SCORING_MODEL: "gemini-3-pro-preview",
+        // gemini-3-pro-preview는 무료 키로 호출 불가(free tier quota=0).
+        // README 문서값이자 무료 키로 동작하는 모델로 사용.
+        SCORING_MODEL: "gemini-2.5-flash",
       },
     });
 

@@ -50,7 +50,9 @@ export const handler = async (
       systemInstruction: buildSystemPrompt(toneMode),
       generationConfig: {
         responseMimeType: "application/json",
-        maxOutputTokens: 256,
+        // gemini-2.5-flash는 thinking 토큰이 출력 예산을 함께 소비한다.
+        // 256은 thinking이 다 먹어 JSON이 잘리므로 충분히 키운다 (cap이라 실사용분만 과금).
+        maxOutputTokens: 2048,
         temperature: 0.4,
       },
     });
