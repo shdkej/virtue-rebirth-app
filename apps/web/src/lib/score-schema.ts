@@ -3,8 +3,9 @@ import { z } from "zod";
 export const ALLOWED_MIME = [
   "image/jpeg",
   "image/png",
-  "image/gif",
   "image/webp",
+  "image/heic",
+  "image/heif",
 ] as const;
 
 export const ScoreRequestSchema = z.object({
