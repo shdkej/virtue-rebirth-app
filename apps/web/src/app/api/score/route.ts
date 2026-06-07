@@ -2,7 +2,7 @@ import { ScoreRequestSchema } from "@/lib/score-schema";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const dynamic = "auto";
 export const maxDuration = 30;
 
 // 채점 로직은 Lambda(`virtue-rebirth-lambda`)가 단일 출처(SoT).

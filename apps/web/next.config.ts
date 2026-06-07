@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
 
+const isStaticExport = process.env.NEXT_OUTPUT === "export";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: isStaticExport ? "export" : undefined,
   async rewrites() {
+    if (isStaticExport) {
+      return [];
+    }
+
     return [
       {
         source: "/ingest/static/:path*",
