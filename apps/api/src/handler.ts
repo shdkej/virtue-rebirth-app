@@ -1,15 +1,35 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
 import { z } from "zod";
 import { Resource } from "sst";
 import { buildSystemPrompt } from "./scorePrompt.js";
 
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"] as const;
 const RequestSchema = z.object({
-  imageBase64: z.string().min(1).max(7_500_000),
-  mimeType: z.enum(ALLOWED_MIME),
+  imageBase64: z.string().min(1).max(7_500_000).optional(),
+  mimeType: z.enum(ALLOWED_MIME).optional(),
   memo: z.string().max(500).optional(),
   toneMode: z.enum(["soft", "casual"]).optional(),
+}).superRefine((value, ctx) => {
+  const hasImage = !!value.imageBase64;
+  const hasMime = !!value.mimeType;
+  const hasMemo = !!value.memo?.trim();
+
+  if (hasImage !== hasMime) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "imageBase64 and mimeType must be provided together",
+      path: hasImage ? ["mimeType"] : ["imageBase64"],
+    });
+  }
+
+  if (!hasImage && !hasMemo) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Provide a photo or memo to score",
+      path: ["memo"],
+    });
+  }
 });
 const ResultSchema = z.object({
   score: z.number().int().min(0).max(10),
@@ -17,10 +37,30 @@ const ResultSchema = z.object({
   tags: z.array(z.string().min(1).max(20)).max(2),
 });
 
+const normalizeResult = (raw: unknown, isMemoOnly: boolean): unknown => {
+  if (!raw || typeof raw !== "object") return raw;
+  const record = raw as Record<string, unknown>;
+  const rawScore = typeof record.score === "number" ? record.score : Number(record.score);
+  const score = Number.isFinite(rawScore)
+    ? Math.max(0, Math.min(10, Math.round(rawScore)))
+    : 0;
+  const comment = String(record.comment ?? "메모 기준으로 보수적으로 봤어요.").slice(0, 120);
+  const tags = Array.isArray(record.tags)
+    ? record.tags.map((tag) => String(tag).trim()).filter(Boolean)
+    : [];
+  if (isMemoOnly && !tags.includes("메모")) tags.unshift("메모");
+
+  return {
+    score,
+    comment,
+    tags: tags.slice(0, 2),
+  };
+};
+
 // Gemini 출력 구조 강제 (타입/필드/순서). 구조적 schema 위반을 막아
 // primary 호출이 ai_invalid_schema로 떨어져 fallback을 2번 호출하는 낭비를 줄인다.
 // (길이 제약은 Gemini schema가 보장 못 하므로 프롬프트 + zod가 최종 가드)
-const GEMINI_RESPONSE_SCHEMA = {
+const GEMINI_RESPONSE_SCHEMA: Schema = {
   type: SchemaType.OBJECT,
   properties: {
     score: { type: SchemaType.INTEGER },
@@ -75,8 +115,12 @@ export const handler = async (
         {
           role: "user",
           parts: [
-            { inlineData: { mimeType, data: imageBase64 } },
-            ...(memo ? [{ text: `메모: ${memo}` }] : []),
+            ...(imageBase64 && mimeType
+              ? [{ inlineData: { mimeType, data: imageBase64 } }]
+              : []),
+            ...(memo
+              ? [{ text: imageBase64 ? `메모: ${memo}` : `사진 없음. 메모만으로 보수적으로 채점하세요. 메모: ${memo}` }]
+              : []),
           ],
         },
       ],
@@ -89,7 +133,7 @@ export const handler = async (
       if (!match) throw new Error(`ai_no_json: ${text.slice(0, 120)}`);
       aiJson = JSON.parse(match[0]);
     }
-    const validated = ResultSchema.safeParse(aiJson);
+    const validated = ResultSchema.safeParse(normalizeResult(aiJson, !imageBase64));
     if (!validated.success) throw new Error("ai_invalid_schema");
     return validated.data;
   };

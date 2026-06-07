@@ -16,8 +16,8 @@ DNS zone: `Z07242312C5BE3VLQW344` (`aws.shdkej.com`).
 
 ```
 sst.config.ts       ApiGatewayV2 + 커스텀 도메인 + Function + Secret
-src/handler.ts      Gemini multimodal 호출 (inlineData 이미지 + 메모)
-src/scorePrompt.ts  채점 시스템 프롬프트 (웹과 동기 — SoT)
+src/handler.ts      Gemini 호출 (이미지+메모 또는 메모-only)
+src/scorePrompt.ts  채점 시스템 프롬프트 (API SoT)
 ```
 
 ## 첫 배포
@@ -55,6 +55,14 @@ curl -X POST https://score-dev.virtue.aws.shdkej.com/score \
 # → { "source":"ai", "model":"gemini-2.5-flash", "score":4, "comment":"...", "tags":["배려","일상"] }
 ```
 
+사진 없이 메모만 보내는 것도 허용한다. 이때는 보수적으로 낮거나 중간 점수를 매긴다.
+
+```bash
+curl -X POST https://score.virtue.aws.shdkej.com/score \
+  -H 'content-type: application/json' \
+  -d '{"memo":"아침에 엘리베이터 문을 잡아줬어요","toneMode":"soft"}'
+```
+
 ## 보안 노트
 
 - API Gateway 현재 인증 없음. 베타까진 OK. 출시 전 택1:
@@ -66,11 +74,11 @@ curl -X POST https://score-dev.virtue.aws.shdkej.com/score \
 
 ## 동기화 정책
 
-`scorePrompt.ts`가 단일 출처(SoT). 웹 앱(`virtue-rebirth-app/src/lib/score-prompt.ts`)을 수정하면 여기도 같이 업데이트.
+`src/scorePrompt.ts`가 API 채점 프롬프트의 단일 출처(SoT).
 
 ## 모델 변경
 
-`sst.config.ts` 의 `SCORING_MODEL` 만 바꾸고 재배포. 후보: `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-2.0-flash`.
+`sst.config.ts` 의 `SCORING_MODEL` / `SCORING_MODEL_FALLBACK` 을 바꾸고 재배포. 현재 production 기본값은 `gemini-2.5-flash`, fallback은 `gemini-2.5-flash-lite`.
 
 ## 참고
 

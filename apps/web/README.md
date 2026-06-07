@@ -27,13 +27,13 @@ pnpm start       # 프로덕션 서버 (build 후)
 - Next.js 16 (App Router, Turbopack) + React 19.2 + TypeScript
 - Tailwind CSS v4 + OKLCH 토큰 + Pretendard Variable
 - lucide-react 아이콘
-- 기본 운영은 mock 채점. `NEXT_PUBLIC_SCORING_MODE=ai` 설정 시 Claude Vision 서버사이드 `/api/score` (Anthropic SDK + zod)를 호출하고 실패하면 mock 폴백.
+- 기본 운영은 mock 채점. `NEXT_PUBLIC_SCORING_MODE=ai` 설정 시 `/api/score` 또는 `NEXT_PUBLIC_SCORE_API_URL`의 Lambda 채점 API를 호출하고 실패하면 mock 폴백.
 - 데이터는 로컬 localStorage (외부 DB/사진 저장소 없음 — 추후 변경 예정)
 
 ## 메뉴 (5개, 하단 탭)
 
 1. **덕력** (`/`) — 누적 덕력 + 환생종 + 최근 덕행 미리보기
-2. **덕 쌓기** (`/add`) — 사진 + 메모 + mock AI 채점 → 저장
+2. **덕 쌓기** (`/add`) — 사진 또는 메모 + AI/mock 채점 → 저장
 3. **덕행록** (`/deeds`) — 일자별 타임라인 (오늘/어제/N일 전)
 4. **환생도감** (`/dex`) — 종 단계별 컬렉션, 잠긴 단계 티저
 5. **나** (`/me`) — 말투(soft/casual) / 일일 30덕 상한 / 테마 / 데이터 내보내기
@@ -44,31 +44,35 @@ pnpm start       # 프로덕션 서버 (build 후)
   - 키: `virtue.rebirth.v1`, `virtue.tone.v1`, `virtue.dailycap.v1`, `virtue.theme.v1`
   - 첫 로드 시 `MOCK_DEEDS` 14건이 시드됨.
 - `src/lib/judge.ts` — mock 채점 풀 (메모 키워드 라우팅 + soft/casual 50+ 코멘트). AI 키가 없거나 호출 실패 시 폴백 경로.
-- `src/lib/score-client.ts` / `src/app/api/score/route.ts` — 서버사이드 Claude Vision 채점. `IJudgeOutcome.source = "ai" | "mock"`.
+- `src/lib/score-client.ts` / `src/app/api/score/route.ts` — Lambda 채점 API 호출. `IJudgeOutcome.source = "ai" | "mock"`.
 - `src/lib/species.ts` — 11단계 (돌→천계의 무언가). 단계마다 `trait`/`evolutionLine`/`nextHint`.
 - 저장 시 직전 누적 → 새 누적 사이에 종 임계치 통과하면 LevelUpSheet 모달이 표시됨.
 
-## AI 채점 (Claude Vision)
+## AI 채점 (Lambda/Gemini)
 
-현재 배포 기본값은 `NEXT_PUBLIC_SCORING_MODE=mock` 입니다. 이 경우 사진을 업로드해도 외부 AI를 호출하지 않고 mock 채점만 사용합니다.
+로컬 기본값은 `NEXT_PUBLIC_SCORING_MODE=mock` 입니다. 이 경우 사진이나 메모를 입력해도 외부 AI를 호출하지 않고 mock 채점만 사용합니다.
 
-`NEXT_PUBLIC_SCORING_MODE=ai` 로 바꾸면 `/api/score` (POST)를 호출합니다. 이 API는 서버사이드 Node 런타임이며 요청·응답 모두 zod로 검증합니다.
+`NEXT_PUBLIC_SCORING_MODE=ai` 로 바꾸면 `/api/score` 또는 `NEXT_PUBLIC_SCORE_API_URL` (POST)를 호출합니다. 정적 배포(`https://virtue.aws.shdkej.com`)는 `NEXT_PUBLIC_SCORE_API_URL=https://score.virtue.aws.shdkej.com/score`로 Lambda를 직접 호출합니다.
+
+`/add`에서는 사진 또는 메모 중 하나가 있어야 채점 버튼이 활성화됩니다. 모바일 사진첩 선택을 막지 않도록 file input은 `capture`를 강제하지 않습니다.
 
 요청:
 
 ```json
 {
-  "imageBase64": "<base64>",
-  "mimeType": "image/jpeg|png|gif|webp",
+  "imageBase64": "<base64, optional>",
+  "mimeType": "image/jpeg|image/png|image/webp|image/heic|image/heif",
   "memo": "선택, 500자 이내",
   "toneMode": "soft|casual"
 }
 ```
 
+사진 없이 메모만 보낼 수도 있습니다.
+
 응답 (200):
 
 ```json
-{ "source": "ai", "model": "claude-sonnet-4-6", "score": 3, "comment": "...", "tags": ["배려","일상"] }
+{ "source": "ai", "model": "gemini-3-pro-preview", "score": 3, "comment": "...", "tags": ["배려","일상"] }
 ```
 
 상태 코드:
@@ -76,9 +80,7 @@ pnpm start       # 프로덕션 서버 (build 후)
 - `200` — AI 채점 성공.
 - `400` — 요청 스키마 불일치.
 - `502` — AI 호출 실패 또는 응답 파싱 실패. 클라이언트는 자동 mock 폴백.
-- `503` — `ANTHROPIC_API_KEY` 미설정. 클라이언트는 자동 mock 폴백.
-
-시스템 프롬프트는 `src/lib/score-prompt.ts` — 사실 묘사 + 가벼운 유머, 도덕적 칭찬/설교 금지.
+- API 호출 실패나 non-200 응답은 클라이언트에서 자동 mock 폴백.
 
 ### 환경 변수
 
@@ -88,8 +90,7 @@ pnpm start       # 프로덕션 서버 (build 후)
 |---|---|---|
 | `NEXT_PUBLIC_SCORING_MODE` | `mock` | `mock`이면 외부 AI 호출 없이 mock 채점. `ai`이면 채점 API 호출 후 실패 시 mock 폴백. |
 | `NEXT_PUBLIC_SCORE_API_URL` | `/api/score` | 정적 export에서 Lambda 채점 API를 직접 호출할 때 사용. 예: `https://score.virtue.aws.shdkej.com/score`. |
-| `ANTHROPIC_API_KEY` | (없음) | `NEXT_PUBLIC_SCORING_MODE=ai`일 때 Claude Vision 호출용. |
-| `SCORING_MODEL` | `claude-sonnet-4-6` | 사용할 Claude 모델 ID. |
+| `SCORE_LAMBDA_URL` | `https://score.virtue.aws.shdkej.com/score` | 동적 Next API route가 프록시할 Lambda URL. |
 
 `.env.example` 참조.
 

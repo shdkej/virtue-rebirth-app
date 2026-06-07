@@ -28,6 +28,7 @@ const MAX_REROLLS = 3;
 const IS_AI_MODE = process.env.NEXT_PUBLIC_SCORING_MODE === "ai";
 const JUDGE_LABEL = IS_AI_MODE ? "AI 채점" : "임시 판정";
 const JUDGE_HEADER = IS_AI_MODE ? "AI가 본 오늘" : "임시 판정 결과";
+const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif";
 
 const AddDeedPage = () => {
   const router = useRouter();
@@ -131,6 +132,10 @@ const AddDeedPage = () => {
   };
 
   const onJudge = () => {
+    if (!file && !memo.trim()) {
+      showToast("사진을 고르거나 메모를 적어주세요.");
+      return;
+    }
     setRerolls(0);
     posthog.capture("deed_judge_attempted", {
       has_photo: !!file,
@@ -221,6 +226,15 @@ const AddDeedPage = () => {
     !!result &&
     capEnabled &&
     stats.today + result.score > DAILY_CAP;
+  const hasMemo = memo.trim().length > 0;
+  const canJudge = !!file || hasMemo;
+  const judgeButtonLabel = !canJudge
+    ? "사진 또는 메모 필요"
+    : file
+      ? JUDGE_LABEL
+      : IS_AI_MODE
+        ? "메모로 AI 채점"
+        : JUDGE_LABEL;
 
   return (
     <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
@@ -258,8 +272,7 @@ const AddDeedPage = () => {
             ref={fileInputRef}
             id="proof-photo"
             type="file"
-            accept="image/*"
-            capture="environment"
+            accept={IMAGE_ACCEPT}
             className="sr-only"
             onChange={onPickFile}
           />
@@ -285,7 +298,7 @@ const AddDeedPage = () => {
       <div className="flex gap-2">
         <button
           type="button"
-          disabled={judging}
+          disabled={judging || !canJudge}
           onClick={onJudge}
           className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--brand)] px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[color-mix(in_oklab,var(--brand),transparent_70%)] transition active:scale-[0.98] disabled:opacity-60"
         >
@@ -297,7 +310,7 @@ const AddDeedPage = () => {
           ) : (
             <>
               <Sparkles className="h-4 w-4" aria-hidden />
-              {JUDGE_LABEL}
+              {judgeButtonLabel}
             </>
           )}
         </button>
@@ -405,7 +418,7 @@ const AddDeedPage = () => {
 
       {!result && !preview && (
         <p className="px-1 text-[11px] leading-relaxed text-muted-foreground">
-          <Camera className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden /> 사진은 이 기기에만 잠시 머물러요. 키가 설정돼 있으면 AI가, 없으면 mock이 채점해요.
+          <Camera className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden /> 갤러리 사진이나 카메라 촬영본을 고를 수 있어요. 사진 없이 메모만 있어도 AI가 보수적으로 채점합니다.
         </p>
       )}
 
