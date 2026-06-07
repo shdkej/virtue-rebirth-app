@@ -61,6 +61,8 @@ curl -X POST https://score-dev.virtue.aws.shdkej.com/score \
   - Apple App Attest 토큰 검증 (권장 — iOS 네이티브)
   - API Gateway + API Key + Usage Plan
   - Cloudflare Workers 앞단 + Turnstile
+- 현재 공개 웹 정적판(`https://virtue.aws.shdkej.com`)에서 직접 호출할 수 있도록 production CORS를 해당 origin으로 제한한다.
+- 기본 남용 방지는 2겹이다: Lambda reserved concurrency 5, API Gateway `$default` stage throttling `rate=2 rps`, `burst=10`.
 
 ## 동기화 정책
 

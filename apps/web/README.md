@@ -86,7 +86,8 @@ pnpm start       # 프로덕션 서버 (build 후)
 
 | 키 | 기본값 | 설명 |
 |---|---|---|
-| `NEXT_PUBLIC_SCORING_MODE` | `mock` | `mock`이면 외부 AI 호출 없이 mock 채점. `ai`이면 `/api/score` 호출 후 실패 시 mock 폴백. |
+| `NEXT_PUBLIC_SCORING_MODE` | `mock` | `mock`이면 외부 AI 호출 없이 mock 채점. `ai`이면 채점 API 호출 후 실패 시 mock 폴백. |
+| `NEXT_PUBLIC_SCORE_API_URL` | `/api/score` | 정적 export에서 Lambda 채점 API를 직접 호출할 때 사용. 예: `https://score.virtue.aws.shdkej.com/score`. |
 | `ANTHROPIC_API_KEY` | (없음) | `NEXT_PUBLIC_SCORING_MODE=ai`일 때 Claude Vision 호출용. |
 | `SCORING_MODEL` | `claude-sonnet-4-6` | 사용할 Claude 모델 ID. |
 

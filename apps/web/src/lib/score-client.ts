@@ -11,6 +11,8 @@ export interface IJudgeOutcome extends IJudgeResult {
   fallbackReason?: IFallbackReason;
 }
 
+const scoreApiUrl = process.env.NEXT_PUBLIC_SCORE_API_URL || "/api/score";
+
 const isAllowedMime = (m: string): m is (typeof ALLOWED_MIME)[number] =>
   (ALLOWED_MIME as readonly string[]).includes(m);
 
@@ -44,7 +46,7 @@ export const judgeWithFallback = async (params: {
 
   try {
     const { base64, mimeType } = await fileToBase64(file);
-    const res = await fetch("/api/score", {
+    const res = await fetch(scoreApiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ imageBase64: base64, mimeType, memo, toneMode: tone }),

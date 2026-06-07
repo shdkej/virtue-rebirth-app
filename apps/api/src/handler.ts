@@ -28,7 +28,7 @@ const GEMINI_RESPONSE_SCHEMA = {
     tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
   },
   required: ["score", "comment", "tags"],
-} as const;
+};
 
 const json = (status: number, body: unknown): APIGatewayProxyResultV2 => ({
   statusCode: status,
