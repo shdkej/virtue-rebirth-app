@@ -292,6 +292,9 @@ const AddDeedPage = () => {
           onChange={(e) => setMemo(e.target.value)}
           className="mt-1 w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
         />
+        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+          예: AI가 오늘의 덕행을 정리했어요: 인내 × 3
+        </p>
         <div className="mt-1 text-right text-[10px] text-muted-foreground tabular-nums">{memo.length}/120</div>
       </Card>
 
@@ -376,6 +379,9 @@ const AddDeedPage = () => {
               모델 · {result.model}
             </p>
           )}
+          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+            AI의 관점이에요. 결정은 당신이 해요.
+          </p>
           <div className="mt-4 flex gap-2">
             <button
               type="button"
