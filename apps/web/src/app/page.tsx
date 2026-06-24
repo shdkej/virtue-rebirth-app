@@ -24,6 +24,7 @@ const DashboardPage = () => {
   const deeds = useDeeds();
   const { current, next, progress } = getSpeciesFor(stats.total);
   const recent = deeds.slice(0, 3);
+  const isFirstVisit = stats.count === 0;
 
   // Render the date on the client to avoid SSR/client timezone drift.
   const [todayLabel, setTodayLabel] = useState<string>("");
@@ -54,7 +55,9 @@ const DashboardPage = () => {
 
       <Card className="relative overflow-hidden px-5 py-6">
         <SparkleGlow tone="brand" />
-        <p className="text-xs text-muted-foreground">나의 덕력</p>
+        <p className="text-xs text-muted-foreground">
+          {isFirstVisit ? "오늘의 첫 환생 기록" : "나의 덕력"}
+        </p>
         <div className="mt-1 flex items-baseline gap-1">
           <AnimatedNumber
             value={stats.total}
@@ -62,10 +65,16 @@ const DashboardPage = () => {
           />
           <span className="text-base text-muted-foreground">덕</span>
         </div>
-        {stats.count === 0 ? (
-          <p className="mt-2 text-xs text-muted-foreground">
-            아직 비어있어요. 오늘 1덕만 시작해볼까요?
-          </p>
+        {isFirstVisit ? (
+          <div className="mt-3 space-y-2">
+            <p className="text-sm leading-relaxed text-foreground/80">
+              사진 한 장이나 한 줄 메모만 남기면 AI가 오늘의 덕을 판정하고,
+              당신의 환생도가 바로 움직여요.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              첫 기록은 길게 설명할 필요 없어요. 사소한 거 하나면 충분해요.
+            </p>
+          </div>
         ) : (
           <p className="mt-2 text-xs text-muted-foreground">
             이번 달 <span className="text-foreground">+{stats.month}덕</span>
@@ -108,8 +117,21 @@ const DashboardPage = () => {
         className="group relative flex items-center justify-center gap-2 rounded-2xl bg-[var(--brand)] px-5 py-4 text-base font-semibold text-white shadow-lg shadow-[color-mix(in_oklab,var(--brand),transparent_70%)] transition active:scale-[0.98]"
       >
         <Camera className="h-5 w-5" aria-hidden />
-        오늘 덕 쌓기
+        {isFirstVisit ? "첫 덕 기록해보기" : "오늘 덕 쌓기"}
       </Link>
+
+      {isFirstVisit ? (
+        <Card className="px-5 py-4">
+          <p className="text-xs font-medium text-foreground/75">
+            시작하면 바로 보이는 것
+          </p>
+          <ul className="mt-3 flex flex-col gap-2 text-sm text-muted-foreground">
+            <li>오늘 한 일을 AI가 덕으로 판정해줘요.</li>
+            <li>누적 덕력과 다음 환생종 진행도가 바로 반영돼요.</li>
+            <li>최근 덕행에 첫 기록이 남아 다음 행동이 또렷해져요.</li>
+          </ul>
+        </Card>
+      ) : null}
 
       <Card className="px-5 py-5">
         <div className="mb-3 flex items-center justify-between">
@@ -125,8 +147,8 @@ const DashboardPage = () => {
         {recent.length === 0 ? (
           <EmptyState
             icon={<Sparkles className="h-5 w-5" aria-hidden />}
-            title="아직 기록이 없어요."
-            description="오늘 사소한 거 하나, 카메라로 콕."
+            title="첫 기록이 여기에 쌓여요."
+            description="오늘 덕 하나만 남기면 결과와 함께 바로 돌아와요."
             className="py-6"
           />
         ) : (
