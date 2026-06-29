@@ -47,6 +47,8 @@ const MePage = () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          appId: "virtue",
+          appName: "Virtue",
           type: "settings_feedback",
           message,
           replyEmail: replyEmail.trim() || undefined,
