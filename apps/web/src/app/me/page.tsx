@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, MessageCircle, Moon, Sparkles, Sun } from "lucide-react";
+import { ArrowLeft, Coffee, Download, MessageCircle, Moon, Send, Sparkles, Sun } from "lucide-react";
 import { Card } from "@/components/card";
 import { cn } from "@/lib/cn";
 import {
@@ -22,6 +23,56 @@ const MePage = () => {
   const [dailyCap, setDailyCap] = useDailyCapEnabled();
   const stats = useVirtueStats();
   const { current } = getSpeciesFor(stats.total);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [replyEmail, setReplyEmail] = useState("");
+  const [feedbackSending, setFeedbackSending] = useState(false);
+
+  const feedbackEndpoint = process.env.NEXT_PUBLIC_FEEDBACK_ENDPOINT ?? "";
+  const buyMeCoffeeUrl = process.env.NEXT_PUBLIC_BUY_ME_A_COFFEE_URL ?? "";
+
+  const onSendFeedback = async () => {
+    const message = feedbackMessage.trim();
+    if (message.length < 3) {
+      showToast("조금만 더 적어주세요.");
+      return;
+    }
+    if (!feedbackEndpoint) {
+      showToast("의견 보내기는 아직 연결 준비 중이에요.");
+      return;
+    }
+
+    setFeedbackSending(true);
+    try {
+      const res = await fetch(feedbackEndpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          type: "settings_feedback",
+          message,
+          replyEmail: replyEmail.trim() || undefined,
+          path: typeof window === "undefined" ? "/me" : window.location.pathname,
+          userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
+          appVersion: "0.1.0",
+          stats: {
+            total: stats.total,
+            count: stats.count,
+            today: stats.today,
+            month: stats.month,
+          },
+        }),
+      });
+
+      if (!res.ok) throw new Error("feedback_failed");
+      setFeedbackMessage("");
+      setReplyEmail("");
+      posthog.capture("feedback_sent", { source: "settings" });
+      showToast("의견을 보냈어요. 감사합니다.");
+    } catch {
+      showToast("전송이 막혔어요. 잠시 후 다시 보내주세요.");
+    } finally {
+      setFeedbackSending(false);
+    }
+  };
 
   const onExport = () => {
     try {
@@ -160,6 +211,72 @@ const MePage = () => {
             </button>
           ))}
         </div>
+      </Card>
+
+      <Card className="px-5 py-4">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <MessageCircle className="h-4 w-4 text-muted-foreground" aria-hidden />
+          의견 보내기
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          써보며 막힌 점이나 이상했던 점을 앱 안에서 바로 보내주세요.
+        </p>
+        <textarea
+          value={feedbackMessage}
+          onChange={(e) => setFeedbackMessage(e.target.value)}
+          rows={4}
+          maxLength={3000}
+          placeholder="예: 첫 기록 후 어디로 가야 할지 헷갈렸어요."
+          className="mt-3 min-h-28 w-full resize-none rounded-2xl border border-border bg-background px-3 py-3 text-base outline-none placeholder:text-muted-foreground focus:border-[var(--brand)]"
+        />
+        <input
+          value={replyEmail}
+          onChange={(e) => setReplyEmail(e.target.value)}
+          type="email"
+          inputMode="email"
+          placeholder="답장 받을 이메일 (선택)"
+          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-base outline-none placeholder:text-muted-foreground focus:border-[var(--brand)]"
+        />
+        <button
+          type="button"
+          onClick={onSendFeedback}
+          disabled={feedbackSending}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-3 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Send className="h-4 w-4" aria-hidden />
+          {feedbackSending ? "보내는 중" : "의견 보내기"}
+        </button>
+      </Card>
+
+      <Card className="px-5 py-4">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Coffee className="h-4 w-4 text-muted-foreground" aria-hidden />
+          커피 쏘기
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Virtue가 마음에 들었다면 작은 응원으로 남겨주세요.
+        </p>
+        {buyMeCoffeeUrl ? (
+          <a
+            href={buyMeCoffeeUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => posthog.capture("buy_me_a_coffee_clicked", { source: "settings" })}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
+          >
+            <Coffee className="h-4 w-4" aria-hidden />
+            Buy Me a Coffee
+          </a>
+        ) : (
+          <button
+            type="button"
+            onClick={() => showToast("커피 링크는 아직 연결 준비 중이에요.")}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-semibold text-muted-foreground"
+          >
+            <Coffee className="h-4 w-4" aria-hidden />
+            Buy Me a Coffee
+          </button>
+        )}
       </Card>
 
       <Card className="px-5 py-4">
