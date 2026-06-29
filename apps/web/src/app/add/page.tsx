@@ -290,7 +290,7 @@ const AddDeedPage = () => {
           value={memo}
           maxLength={120}
           onChange={(e) => setMemo(e.target.value)}
-          className="mt-1 w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
+          className="mt-1 w-full resize-none bg-transparent text-base placeholder:text-muted-foreground focus:outline-none"
         />
         <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
           예: AI가 오늘의 덕행을 정리했어요: 인내 × 3
