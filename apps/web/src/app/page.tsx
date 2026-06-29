@@ -25,6 +25,7 @@ const DashboardPage = () => {
   const { current, next, progress } = getSpeciesFor(stats.total);
   const recent = deeds.slice(0, 3);
   const isFirstVisit = stats.count === 0;
+  const isReturningWithoutRecent = stats.count > 0 && recent.length === 0;
 
   // Render the date on the client to avoid SSR/client timezone drift.
   const [todayLabel, setTodayLabel] = useState<string>("");
@@ -147,8 +148,16 @@ const DashboardPage = () => {
         {recent.length === 0 ? (
           <EmptyState
             icon={<Sparkles className="h-5 w-5" aria-hidden />}
-            title="첫 기록이 여기에 쌓여요."
-            description="오늘 덕 하나만 남기면 결과와 함께 바로 돌아와요."
+            title={
+              isReturningWithoutRecent
+                ? "최근 덕행을 불러오는 중이에요."
+                : "첫 기록이 여기에 쌓여요."
+            }
+            description={
+              isReturningWithoutRecent
+                ? "누적 덕력은 살아 있어요. 잠시 후 최근 기록이 다시 붙어요."
+                : "오늘 덕 하나만 남기면 결과와 함께 바로 돌아와요."
+            }
             className="py-6"
           />
         ) : (
